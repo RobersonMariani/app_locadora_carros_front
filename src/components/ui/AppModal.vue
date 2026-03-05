@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { XMarkIcon } from '@heroicons/vue/24/outline'
+
 interface Props {
   open: boolean
   title?: string
@@ -34,28 +36,37 @@ const maxWidthClasses: Record<string, string> = {
     >
       <div
         v-if="open"
-        class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+        class="fixed inset-0 z-50 flex items-center justify-center bg-surface-900/60 backdrop-blur-sm p-4"
         @click.self="emit('close')"
       >
-        <div
-          :class="['w-full rounded-xl bg-white p-6 shadow-xl', maxWidthClasses[maxWidth]]"
-          @click.stop
+        <Transition
+          enter-active-class="transition duration-200 ease-out"
+          enter-from-class="scale-95 opacity-0"
+          enter-to-class="scale-100 opacity-100"
+          leave-active-class="transition duration-150 ease-in"
+          leave-from-class="scale-100 opacity-100"
+          leave-to-class="scale-95 opacity-0"
         >
-          <div v-if="title" class="mb-4 flex items-center justify-between">
-            <h3 class="text-lg font-semibold text-gray-900">{{ title }}</h3>
-            <button class="text-gray-400 hover:text-gray-600" @click="emit('close')">
-              <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              </svg>
-            </button>
+          <div
+            v-if="open"
+            :class="[
+              'w-full rounded-2xl border border-surface-200 bg-white p-6 shadow-2xl shadow-surface-900/10',
+              maxWidthClasses[maxWidth],
+            ]"
+            @click.stop
+          >
+            <div v-if="title" class="mb-5 flex items-center justify-between">
+              <h3 class="text-lg font-bold text-surface-900">{{ title }}</h3>
+              <button
+                class="rounded-xl p-1.5 text-surface-400 transition-colors hover:bg-surface-100 hover:text-surface-600"
+                @click="emit('close')"
+              >
+                <XMarkIcon class="h-5 w-5" />
+              </button>
+            </div>
+            <slot />
           </div>
-          <slot />
-        </div>
+        </Transition>
       </div>
     </Transition>
   </Teleport>

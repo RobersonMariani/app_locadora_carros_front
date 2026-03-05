@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter, RouterLink } from 'vue-router'
 import { PhotoIcon } from '@heroicons/vue/24/outline'
 import type { AxiosError } from 'axios'
 import { marcaService } from '@/modules/marcas/services/marca.service'
@@ -93,9 +93,15 @@ async function handleSubmit() {
 
 <template>
   <div>
-    <h1 class="mb-6 text-2xl font-bold text-gray-900">Novo Modelo</h1>
+    <nav class="mb-6 flex items-center gap-2 text-sm text-surface-500">
+      <RouterLink :to="{ name: 'modelos' }" class="transition-colors hover:text-primary-600"
+        >Modelos</RouterLink
+      >
+      <span class="text-surface-300">/</span>
+      <span class="font-semibold text-surface-900">Novo Modelo</span>
+    </nav>
 
-    <div class="rounded-xl bg-white p-6 shadow-sm">
+    <div class="rounded-2xl border border-surface-200 bg-white p-6 shadow-sm">
       <form class="space-y-4" @submit.prevent="handleSubmit">
         <AppSelect
           v-model="data.marca_id"
@@ -116,19 +122,19 @@ async function handleSubmit() {
         />
 
         <div>
-          <label class="mb-1 block text-sm font-medium text-gray-700">
+          <label class="mb-1 block text-sm font-medium text-surface-700">
             Imagem
             <span class="text-danger-500">*</span>
           </label>
           <label
-            class="flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 px-6 py-8 transition-colors hover:border-primary-500 hover:bg-gray-100"
+            class="flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-surface-300 bg-surface-50 px-6 py-8 transition-colors hover:border-primary-500 hover:bg-surface-100"
           >
             <input type="file" accept=".png,.jpg,.jpeg" class="hidden" @change="onFileChange" />
             <div v-if="imagePreview" class="mb-2 max-h-32 overflow-hidden">
               <img :src="imagePreview" alt="Preview" class="max-h-32 object-contain" />
             </div>
-            <PhotoIcon v-else class="mb-2 h-12 w-12 text-gray-400" />
-            <span class="text-sm text-gray-600"
+            <PhotoIcon v-else class="mb-2 h-12 w-12 text-surface-400" />
+            <span class="text-sm text-surface-600"
               >Clique para selecionar imagem (.png, .jpg, .jpeg)</span
             >
           </label>
@@ -156,17 +162,17 @@ async function handleSubmit() {
             <input
               v-model="data.air_bag"
               type="checkbox"
-              class="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+              class="rounded border-surface-300 text-primary-600 focus:ring-primary-500"
             />
-            <span class="text-sm font-medium text-gray-700">Air Bag</span>
+            <span class="text-sm font-medium text-surface-700">Air Bag</span>
           </label>
           <label class="flex cursor-pointer items-center gap-2">
             <input
               v-model="data.abs"
               type="checkbox"
-              class="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+              class="rounded border-surface-300 text-primary-600 focus:ring-primary-500"
             />
-            <span class="text-sm font-medium text-gray-700">ABS</span>
+            <span class="text-sm font-medium text-surface-700">ABS</span>
           </label>
         </div>
 

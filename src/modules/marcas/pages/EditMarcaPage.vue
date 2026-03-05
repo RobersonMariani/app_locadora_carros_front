@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { useRoute, useRouter, RouterLink } from 'vue-router'
 import { PhotoIcon } from '@heroicons/vue/24/outline'
 import type { AxiosError } from 'axios'
 import { marcaService } from '@/modules/marcas/services/marca.service'
@@ -84,11 +84,17 @@ async function handleSubmit() {
 
 <template>
   <div>
-    <h1 class="mb-6 text-2xl font-bold text-gray-900">Editar Marca</h1>
+    <nav class="mb-6 flex items-center gap-2 text-sm text-surface-500">
+      <RouterLink :to="{ name: 'marcas' }" class="transition-colors hover:text-primary-600"
+        >Marcas</RouterLink
+      >
+      <span class="text-surface-300">/</span>
+      <span class="font-semibold text-surface-900">Editar Marca</span>
+    </nav>
 
     <div v-if="loading" class="flex justify-center py-12">
       <svg
-        class="h-8 w-8 animate-spin text-primary-600"
+        class="h-8 w-8 animate-spin text-primary-500"
         xmlns="http://www.w3.org/2000/svg"
         fill="none"
         viewBox="0 0 24 24"
@@ -102,30 +108,30 @@ async function handleSubmit() {
       </svg>
     </div>
 
-    <div v-else class="rounded-xl bg-white p-6 shadow-sm">
+    <div v-else class="rounded-2xl border border-surface-200 bg-white p-6 shadow-sm">
       <form class="space-y-4" @submit.prevent="handleSubmit">
         <AppInput v-model="data.nome" label="Nome" placeholder="Ex: Toyota" :error="errors.nome" />
 
         <div>
-          <label class="mb-1 block text-sm font-medium text-gray-700">Imagem</label>
+          <label class="mb-1 block text-sm font-medium text-surface-700">Imagem</label>
           <div class="mb-2 flex items-center gap-4">
             <div
               v-if="currentImageUrl && !imagePreview"
-              class="flex h-20 w-20 items-center justify-center overflow-hidden rounded-lg bg-gray-100"
+              class="flex h-20 w-20 items-center justify-center overflow-hidden rounded-xl bg-surface-100"
             >
               <img :src="currentImageUrl" alt="Atual" class="max-h-20 object-contain" />
             </div>
             <div v-else-if="imagePreview" class="max-h-32 overflow-hidden">
               <img :src="imagePreview" alt="Nova" class="max-h-32 object-contain" />
             </div>
-            <span v-else class="text-sm text-gray-500">Nenhuma imagem</span>
+            <span v-else class="text-sm text-surface-500">Nenhuma imagem</span>
           </div>
           <label
-            class="flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 px-6 py-4 transition-colors hover:border-primary-500 hover:bg-gray-100"
+            class="flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-surface-300 bg-surface-50 px-6 py-4 transition-colors hover:border-primary-400 hover:bg-surface-100"
           >
             <input type="file" accept=".png" class="hidden" @change="onFileChange" />
-            <PhotoIcon class="mb-1 h-8 w-8 text-gray-400" />
-            <span class="text-sm text-gray-600">Selecionar nova imagem (.png)</span>
+            <PhotoIcon class="mb-1 h-8 w-8 text-surface-400" />
+            <span class="text-sm text-surface-600">Selecionar nova imagem (.png)</span>
           </label>
           <p v-if="errors.imagem" class="mt-1 text-sm text-danger-600">{{ errors.imagem }}</p>
         </div>

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter, RouterLink } from 'vue-router'
 import z from 'zod'
 import AppButton from '@/components/ui/AppButton.vue'
 import AppInput from '@/components/ui/AppInput.vue'
@@ -66,13 +66,15 @@ async function handleSubmit() {
 
 <template>
   <div>
-    <nav class="mb-6 flex items-center gap-2 text-sm text-gray-600">
-      <RouterLink :to="{ name: 'carros' }" class="hover:text-primary-600">Carros</RouterLink>
-      <span>/</span>
-      <span class="font-medium text-gray-900">Novo Carro</span>
+    <nav class="mb-6 flex items-center gap-2 text-sm text-surface-500">
+      <RouterLink :to="{ name: 'carros' }" class="transition-colors hover:text-primary-600"
+        >Carros</RouterLink
+      >
+      <span class="text-surface-300">/</span>
+      <span class="font-semibold text-surface-900">Novo Carro</span>
     </nav>
 
-    <div class="rounded-xl bg-white p-6 shadow-sm">
+    <div class="rounded-2xl border border-surface-200 bg-white p-6 shadow-sm">
       <form @submit.prevent="handleSubmit" class="space-y-4">
         <AppSelect
           v-model="data.modelo_id"
@@ -97,9 +99,9 @@ async function handleSubmit() {
             v-model="data.disponivel"
             type="checkbox"
             id="disponivel"
-            class="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+            class="rounded border-surface-300 text-primary-600 focus:ring-primary-500"
           />
-          <label for="disponivel" class="text-sm font-medium text-gray-700">Disponível</label>
+          <label for="disponivel" class="text-sm font-medium text-surface-700">Disponível</label>
         </div>
 
         <AppInput

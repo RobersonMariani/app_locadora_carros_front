@@ -50,16 +50,19 @@ function goToPage(page: number) {
 <template>
   <div>
     <div class="mb-6 flex items-center justify-between">
-      <h1 class="text-2xl font-bold text-gray-900">Marcas</h1>
+      <div>
+        <h1 class="text-2xl font-bold text-surface-900">Marcas</h1>
+        <p class="mt-1 text-sm text-surface-500">Cadastro de marcas de veículos</p>
+      </div>
       <RouterLink :to="{ name: 'marcas.create' }">
         <AppButton>Nova Marca</AppButton>
       </RouterLink>
     </div>
 
-    <div class="rounded-xl bg-white p-6 shadow-sm">
+    <div class="rounded-2xl border border-surface-200 bg-white p-6 shadow-sm">
       <div v-if="marcasStore.loading" class="flex justify-center py-12">
         <svg
-          class="h-8 w-8 animate-spin text-primary-600"
+          class="h-8 w-8 animate-spin text-primary-500"
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
           viewBox="0 0 24 24"
@@ -81,50 +84,54 @@ function goToPage(page: number) {
       </div>
 
       <div v-else-if="marcasStore.marcas.length === 0" class="py-12 text-center">
-        <PhotoIcon class="mx-auto h-12 w-12 text-gray-400" />
-        <p class="mt-2 text-gray-500">Nenhuma marca cadastrada.</p>
+        <PhotoIcon class="mx-auto h-12 w-12 text-surface-400" />
+        <p class="mt-2 text-surface-500">Nenhuma marca cadastrada.</p>
         <RouterLink :to="{ name: 'marcas.create' }" class="mt-4 inline-block">
           <AppButton>Cadastrar primeira marca</AppButton>
         </RouterLink>
       </div>
 
       <div v-else>
-        <table class="min-w-full divide-y divide-gray-200">
-          <thead class="bg-gray-50">
+        <table class="min-w-full divide-y divide-surface-200">
+          <thead class="bg-surface-50/80">
             <tr>
               <th
-                class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500"
+                class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-surface-500"
               >
                 Imagem
               </th>
               <th
-                class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500"
+                class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-surface-500"
               >
                 Nome
               </th>
               <th
-                class="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500"
+                class="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-surface-500"
               >
                 Ações
               </th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-gray-200 bg-white">
-            <tr v-for="marca in marcasStore.marcas" :key="marca.id">
+          <tbody class="divide-y divide-surface-200 bg-white">
+            <tr
+              v-for="marca in marcasStore.marcas"
+              :key="marca.id"
+              class="transition-colors hover:bg-surface-50"
+            >
               <td class="whitespace-nowrap px-6 py-4">
                 <div
-                  class="flex h-10 w-10 items-center justify-center overflow-hidden rounded-lg bg-gray-100 object-contain"
+                  class="flex h-10 w-10 items-center justify-center overflow-hidden rounded-xl bg-surface-100 object-contain"
                 >
                   <img
                     v-if="marca.imagem_url"
                     :src="marca.imagem_url"
                     :alt="marca.nome"
-                    class="h-10 w-10 rounded-lg object-cover"
+                    class="h-10 w-10 rounded-xl object-cover"
                   />
-                  <PhotoIcon v-else class="h-6 w-6 text-gray-400" />
+                  <PhotoIcon v-else class="h-6 w-6 text-surface-400" />
                 </div>
               </td>
-              <td class="whitespace-nowrap px-6 py-4 text-sm font-medium text-gray-900">
+              <td class="whitespace-nowrap px-6 py-4 text-sm font-medium text-surface-900">
                 {{ marca.nome }}
               </td>
               <td class="whitespace-nowrap px-6 py-4 text-right">
@@ -147,9 +154,9 @@ function goToPage(page: number) {
 
         <div
           v-if="marcasStore.hasPages"
-          class="mt-4 flex items-center justify-between border-t border-gray-200 pt-4"
+          class="mt-4 flex items-center justify-between border-t border-surface-200 pt-4"
         >
-          <p class="text-sm text-gray-600">
+          <p class="text-sm text-surface-500">
             Mostrando página {{ marcasStore.pagination.current_page }} de
             {{ marcasStore.pagination.last_page }}
           </p>
@@ -181,7 +188,7 @@ function goToPage(page: number) {
       max-width="sm"
       @close="closeDeleteModal"
     >
-      <p v-if="marcaToDelete" class="text-gray-600">
+      <p v-if="marcaToDelete" class="text-surface-600">
         Tem certeza que deseja excluir a marca <strong>{{ marcaToDelete.nome }}</strong
         >?
       </p>

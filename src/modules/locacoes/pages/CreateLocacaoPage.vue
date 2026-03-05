@@ -116,13 +116,15 @@ async function handleSubmit() {
 
 <template>
   <div>
-    <nav class="mb-6 flex items-center gap-2 text-sm text-gray-600">
-      <RouterLink :to="{ name: 'locacoes' }" class="hover:text-primary-600">Locações</RouterLink>
-      <span>/</span>
-      <span class="font-medium text-gray-900">Nova Locação</span>
+    <nav class="mb-6 flex items-center gap-2 text-sm text-surface-500">
+      <RouterLink :to="{ name: 'locacoes' }" class="transition-colors hover:text-primary-600"
+        >Locações</RouterLink
+      >
+      <span class="text-surface-300">/</span>
+      <span class="font-semibold text-surface-900">Nova Locação</span>
     </nav>
 
-    <div class="rounded-xl bg-white p-6 shadow-sm">
+    <div class="rounded-2xl border border-surface-200 bg-white p-6 shadow-sm">
       <form @submit.prevent="handleSubmit" class="space-y-4">
         <AppSelect
           v-model="data.cliente_id"

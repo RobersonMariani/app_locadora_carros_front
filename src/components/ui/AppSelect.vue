@@ -26,7 +26,7 @@ const model = defineModel<string | number>()
 
 <template>
   <div>
-    <label v-if="label" class="mb-1 block text-sm font-medium text-gray-700">
+    <label v-if="label" class="mb-1.5 block text-sm font-medium text-surface-700">
       {{ label }}
       <span v-if="required" class="text-danger-500">*</span>
     </label>
@@ -35,18 +35,18 @@ const model = defineModel<string | number>()
       :required="required"
       :disabled="disabled"
       :class="[
-        'w-full rounded-lg border px-3 py-2 text-sm transition-colors duration-200',
+        'w-full rounded-xl border px-4 py-2.5 text-sm transition-all duration-200',
         error
-          ? 'border-danger-500 focus:border-danger-500 focus:ring-1 focus:ring-danger-500'
-          : 'border-gray-300 focus:border-primary-500 focus:ring-1 focus:ring-primary-500',
-        disabled ? 'cursor-not-allowed bg-gray-50' : 'bg-white',
+          ? 'border-danger-400 bg-danger-50/50 focus:border-danger-500 focus:ring-2 focus:ring-danger-500/20'
+          : 'border-surface-200 bg-white focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20',
+        disabled ? 'cursor-not-allowed bg-surface-50 text-surface-400' : '',
       ]"
     >
-      <option value="" disabled>{{ placeholder }}</option>
+      <option value="" disabled class="text-surface-400">{{ placeholder }}</option>
       <option v-for="opt in options" :key="opt.value" :value="opt.value">
         {{ opt.label }}
       </option>
     </select>
-    <p v-if="error" class="mt-1 text-sm text-danger-600">{{ error }}</p>
+    <p v-if="error" class="mt-1.5 text-xs font-medium text-danger-600">{{ error }}</p>
   </div>
 </template>

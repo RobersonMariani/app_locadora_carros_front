@@ -35,36 +35,50 @@ async function handleLogin() {
 </script>
 
 <template>
-  <div class="w-full max-w-md">
-    <div class="rounded-xl bg-white px-8 py-10 shadow-lg">
-      <div class="mb-8 flex justify-center">
-        <ApplicationLogo size="lg" />
-      </div>
+  <div class="w-full max-w-md px-4">
+    <div class="mb-10 flex justify-center">
+      <ApplicationLogo size="lg" theme="dark" />
+    </div>
 
-      <h1 class="mb-2 text-center text-2xl font-bold text-gray-900">Bem-vindo de volta</h1>
-      <p class="mb-8 text-center text-sm text-gray-500">Faça login para acessar o sistema</p>
+    <div class="rounded-2xl border border-white/10 bg-white/5 p-8 shadow-2xl shadow-black/20 backdrop-blur-xl">
+      <h1 class="mb-2 text-center text-2xl font-bold text-white">Bem-vindo de volta</h1>
+      <p class="mb-8 text-center text-sm text-surface-400">
+        Faça login para acessar o sistema
+      </p>
 
       <form @submit.prevent="handleLogin" class="space-y-5">
-        <AppInput
-          v-model="email"
-          label="E-mail"
-          type="email"
-          placeholder="seu@email.com"
-          required
-        />
+        <div>
+          <label class="mb-1.5 block text-sm font-medium text-surface-300">E-mail</label>
+          <input
+            v-model="email"
+            type="email"
+            placeholder="seu@email.com"
+            required
+            class="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white placeholder:text-surface-500 transition-all duration-200 focus:border-primary-400 focus:ring-2 focus:ring-primary-400/20"
+          />
+        </div>
 
-        <AppInput
-          v-model="password"
-          label="Senha"
-          type="password"
-          placeholder="Digite sua senha"
-          required
-        />
+        <div>
+          <label class="mb-1.5 block text-sm font-medium text-surface-300">Senha</label>
+          <input
+            v-model="password"
+            type="password"
+            placeholder="Digite sua senha"
+            required
+            class="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white placeholder:text-surface-500 transition-all duration-200 focus:border-primary-400 focus:ring-2 focus:ring-primary-400/20"
+          />
+        </div>
 
-        <p v-if="error" class="text-sm text-danger-600">{{ error }}</p>
+        <div v-if="error" class="rounded-xl border border-danger-500/20 bg-danger-500/10 px-4 py-3">
+          <p class="text-sm text-danger-400">{{ error }}</p>
+        </div>
 
-        <AppButton type="submit" :loading="loading" class="w-full"> Entrar </AppButton>
+        <AppButton type="submit" :loading="loading" class="w-full" size="lg"> Entrar </AppButton>
       </form>
     </div>
+
+    <p class="mt-8 text-center text-xs text-surface-600">
+      Locadora de Carros &copy; {{ new Date().getFullYear() }}
+    </p>
   </div>
 </template>

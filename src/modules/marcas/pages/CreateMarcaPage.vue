@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter, RouterLink } from 'vue-router'
 import { PhotoIcon } from '@heroicons/vue/24/outline'
 import type { AxiosError } from 'axios'
 import { marcaService } from '@/modules/marcas/services/marca.service'
@@ -64,9 +64,15 @@ async function handleSubmit() {
 
 <template>
   <div>
-    <h1 class="mb-6 text-2xl font-bold text-gray-900">Nova Marca</h1>
+    <nav class="mb-6 flex items-center gap-2 text-sm text-surface-500">
+      <RouterLink :to="{ name: 'marcas' }" class="transition-colors hover:text-primary-600"
+        >Marcas</RouterLink
+      >
+      <span class="text-surface-300">/</span>
+      <span class="font-semibold text-surface-900">Nova Marca</span>
+    </nav>
 
-    <div class="rounded-xl bg-white p-6 shadow-sm">
+    <div class="rounded-2xl border border-surface-200 bg-white p-6 shadow-sm">
       <form class="space-y-4" @submit.prevent="handleSubmit">
         <AppInput
           v-model="data.nome"
@@ -77,19 +83,19 @@ async function handleSubmit() {
         />
 
         <div>
-          <label class="mb-1 block text-sm font-medium text-gray-700">
+          <label class="mb-1 block text-sm font-medium text-surface-700">
             Imagem
             <span class="text-danger-500">*</span>
           </label>
           <label
-            class="flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 px-6 py-8 transition-colors hover:border-primary-500 hover:bg-gray-100"
+            class="flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-surface-300 bg-surface-50 px-6 py-8 transition-colors hover:border-primary-400 hover:bg-surface-100"
           >
             <input type="file" accept=".png" class="hidden" @change="onFileChange" />
             <div v-if="imagePreview" class="mb-2 max-h-32 overflow-hidden">
               <img :src="imagePreview" alt="Preview" class="max-h-32 object-contain" />
             </div>
-            <PhotoIcon v-else class="mb-2 h-12 w-12 text-gray-400" />
-            <span class="text-sm text-gray-600">Clique para selecionar imagem (.png)</span>
+            <PhotoIcon v-else class="mb-2 h-12 w-12 text-surface-400" />
+            <span class="text-sm text-surface-600">Clique para selecionar imagem (.png)</span>
           </label>
           <p v-if="errors.imagem" class="mt-1 text-sm text-danger-600">{{ errors.imagem }}</p>
         </div>

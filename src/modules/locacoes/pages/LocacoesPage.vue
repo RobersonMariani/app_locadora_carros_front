@@ -64,92 +64,99 @@ onMounted(() => loadLocacoes(1))
 <template>
   <div>
     <div class="mb-6 flex items-center justify-between">
-      <h1 class="text-2xl font-bold text-gray-900">Locações</h1>
+      <div>
+        <h1 class="text-2xl font-bold text-surface-900">Locações</h1>
+        <p class="mt-1 text-sm text-surface-500">Controle de locações e devoluções</p>
+      </div>
       <AppButton @click="router.push({ name: 'locacoes.create' })"> Nova Locação </AppButton>
     </div>
 
-    <div class="rounded-xl bg-white shadow-sm">
-      <div v-if="locacoesStore.loading" class="p-8 text-center text-gray-500">Carregando...</div>
+    <div class="rounded-2xl border border-surface-200 bg-white shadow-sm">
+      <div v-if="locacoesStore.loading" class="p-8 text-center text-surface-500">Carregando...</div>
 
-      <div v-else-if="locacoesStore.locacoes.length === 0" class="p-8 text-center text-gray-500">
+      <div v-else-if="locacoesStore.locacoes.length === 0" class="p-8 text-center text-surface-500">
         Nenhuma locação cadastrada.
       </div>
 
-      <div v-else class="min-w-full divide-y divide-gray-200 overflow-x-auto">
-        <table class="min-w-full divide-y divide-gray-200">
-          <thead class="bg-gray-50">
+      <div v-else class="min-w-full divide-y divide-surface-200 overflow-x-auto">
+        <table class="min-w-full divide-y divide-surface-200">
+          <thead class="bg-surface-50/80">
             <tr>
               <th
-                class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500"
+                class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-surface-500"
               >
                 Cliente
               </th>
               <th
-                class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500"
+                class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-surface-500"
               >
                 Carro
               </th>
               <th
-                class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500"
+                class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-surface-500"
               >
                 Data Início
               </th>
               <th
-                class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500"
+                class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-surface-500"
               >
                 Data Prevista
               </th>
               <th
-                class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500"
+                class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-surface-500"
               >
                 Data Realizada
               </th>
               <th
-                class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500"
+                class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-surface-500"
               >
                 Valor Diária
               </th>
               <th
-                class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500"
+                class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-surface-500"
               >
                 KM Inicial
               </th>
               <th
-                class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500"
+                class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-surface-500"
               >
                 KM Final
               </th>
               <th
-                class="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500"
+                class="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-surface-500"
               >
                 Ações
               </th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-gray-200 bg-white">
-            <tr v-for="locacao in locacoesStore.locacoes" :key="locacao.id">
-              <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-900">
+          <tbody class="divide-y divide-surface-200 bg-white">
+            <tr
+              v-for="locacao in locacoesStore.locacoes"
+              :key="locacao.id"
+              class="transition-colors hover:bg-surface-50"
+            >
+              <td class="whitespace-nowrap px-6 py-4 text-sm text-surface-900">
                 {{ locacao.cliente?.nome ?? '-' }}
               </td>
-              <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-900">
+              <td class="whitespace-nowrap px-6 py-4 text-sm text-surface-900">
                 {{ locacao.carro?.placa ?? '-' }}
               </td>
-              <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
+              <td class="whitespace-nowrap px-6 py-4 text-sm text-surface-500">
                 {{ formatDate(locacao.data_inicio_periodo) }}
               </td>
-              <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
+              <td class="whitespace-nowrap px-6 py-4 text-sm text-surface-500">
                 {{ formatDate(locacao.data_final_previsto_periodo) }}
               </td>
-              <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
+              <td class="whitespace-nowrap px-6 py-4 text-sm text-surface-500">
                 {{ formatDate(locacao.data_final_realizado_periodo) ?? '-' }}
               </td>
-              <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-900">
+              <td class="whitespace-nowrap px-6 py-4 text-sm text-surface-900">
                 {{ formatCurrency(locacao.valor_diaria) }}
               </td>
-              <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
+              <td class="whitespace-nowrap px-6 py-4 text-sm text-surface-500">
                 {{ locacao.km_inicial }}
               </td>
-              <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
+              <td class="whitespace-nowrap px-6 py-4 text-sm text-surface-500">
                 {{ locacao.km_final ?? '-' }}
               </td>
               <td class="whitespace-nowrap px-6 py-4 text-right text-sm">
@@ -176,9 +183,9 @@ onMounted(() => loadLocacoes(1))
 
       <div
         v-if="hasPages"
-        class="flex items-center justify-between border-t border-gray-200 px-6 py-3"
+        class="flex items-center justify-between border-t border-surface-200 px-6 py-3"
       >
-        <p class="text-sm text-gray-600">
+        <p class="text-sm text-surface-600">
           Página {{ meta.current_page }} de {{ meta.last_page }} ({{ meta.total }} registros)
         </p>
         <div class="flex gap-2">
@@ -198,7 +205,7 @@ onMounted(() => loadLocacoes(1))
       max-width="sm"
       @close="closeDeleteModal"
     >
-      <p v-if="locacaoToDelete" class="text-gray-600">
+      <p v-if="locacaoToDelete" class="text-surface-600">
         Tem certeza que deseja excluir esta locação?
         <span v-if="locacaoToDelete.cliente || locacaoToDelete.carro">
           (Cliente: {{ locacaoToDelete.cliente?.nome ?? '-' }}, Carro:

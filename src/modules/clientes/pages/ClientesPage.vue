@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { UserGroupIcon } from '@heroicons/vue/24/outline'
 import AppButton from '@/components/ui/AppButton.vue'
 import AppModal from '@/components/ui/AppModal.vue'
 import { usePagination } from '@/composables/usePagination'
@@ -59,44 +60,73 @@ onMounted(() => loadClientes(1))
 <template>
   <div>
     <div class="mb-6 flex items-center justify-between">
-      <h1 class="text-2xl font-bold text-gray-900">Clientes</h1>
+      <div>
+        <h1 class="text-2xl font-bold text-surface-900">Clientes</h1>
+        <p class="mt-1 text-sm text-surface-500">Gerencie seus clientes cadastrados</p>
+      </div>
       <AppButton @click="router.push({ name: 'clientes.create' })"> Novo Cliente </AppButton>
     </div>
 
-    <div class="rounded-xl bg-white shadow-sm">
-      <div v-if="clientesStore.loading" class="p-8 text-center text-gray-500">Carregando...</div>
-
-      <div v-else-if="clientesStore.clientes.length === 0" class="p-8 text-center text-gray-500">
-        Nenhum cliente cadastrado.
+    <div class="rounded-2xl border border-surface-200 bg-white shadow-sm">
+      <div v-if="clientesStore.loading" class="flex justify-center p-8">
+        <svg
+          class="h-8 w-8 animate-spin text-primary-500"
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+        >
+          <circle
+            class="opacity-25"
+            cx="12"
+            cy="12"
+            r="10"
+            stroke="currentColor"
+            stroke-width="4"
+          />
+          <path
+            class="opacity-75"
+            fill="currentColor"
+            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+          />
+        </svg>
       </div>
 
-      <div v-else class="min-w-full divide-y divide-gray-200 overflow-x-auto">
-        <table class="min-w-full divide-y divide-gray-200">
-          <thead class="bg-gray-50">
+      <div v-else-if="clientesStore.clientes.length === 0" class="p-8 text-center">
+        <UserGroupIcon class="mx-auto h-12 w-12 text-surface-400" />
+        <p class="mt-2 text-surface-500">Nenhum cliente cadastrado.</p>
+      </div>
+
+      <div v-else class="min-w-full overflow-x-auto">
+        <table class="min-w-full divide-y divide-surface-200">
+          <thead class="bg-surface-50/80">
             <tr>
               <th
-                class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500"
+                class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-surface-500"
               >
                 Nome
               </th>
               <th
-                class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500"
+                class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-surface-500"
               >
                 Criado em
               </th>
               <th
-                class="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500"
+                class="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-surface-500"
               >
                 Ações
               </th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-gray-200 bg-white">
-            <tr v-for="cliente in clientesStore.clientes" :key="cliente.id">
-              <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-900">
+          <tbody class="divide-y divide-surface-200 bg-white">
+            <tr
+              v-for="cliente in clientesStore.clientes"
+              :key="cliente.id"
+              class="transition-colors hover:bg-surface-50"
+            >
+              <td class="whitespace-nowrap px-6 py-4 text-sm text-surface-900">
                 {{ cliente.nome }}
               </td>
-              <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
+              <td class="whitespace-nowrap px-6 py-4 text-sm text-surface-500">
                 {{ formatDateTime(cliente.created_at) }}
               </td>
               <td class="whitespace-nowrap px-6 py-4 text-right text-sm">
@@ -123,9 +153,9 @@ onMounted(() => loadClientes(1))
 
       <div
         v-if="hasPages"
-        class="flex items-center justify-between border-t border-gray-200 px-6 py-3"
+        class="flex items-center justify-between border-t border-surface-200 px-6 py-3"
       >
-        <p class="text-sm text-gray-600">
+        <p class="text-sm text-surface-500">
           Página {{ meta.current_page }} de {{ meta.last_page }} ({{ meta.total }} registros)
         </p>
         <div class="flex gap-2">
@@ -145,7 +175,7 @@ onMounted(() => loadClientes(1))
       max-width="sm"
       @close="closeDeleteModal"
     >
-      <p v-if="clienteToDelete" class="text-gray-600">
+      <p v-if="clienteToDelete" class="text-surface-600">
         Tem certeza que deseja excluir o cliente <strong>{{ clienteToDelete.nome }}</strong
         >?
       </p>

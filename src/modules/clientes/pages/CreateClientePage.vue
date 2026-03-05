@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
 import z from 'zod'
+import { ChevronRightIcon } from '@heroicons/vue/24/outline'
 import AppButton from '@/components/ui/AppButton.vue'
 import AppInput from '@/components/ui/AppInput.vue'
 import { useForm } from '@/composables/useForm'
@@ -34,13 +35,13 @@ async function handleSubmit() {
 
 <template>
   <div>
-    <nav class="mb-6 flex items-center gap-2 text-sm text-gray-600">
+    <nav class="mb-6 flex items-center gap-2 text-sm text-surface-500">
       <RouterLink :to="{ name: 'clientes' }" class="hover:text-primary-600">Clientes</RouterLink>
-      <span>/</span>
-      <span class="font-medium text-gray-900">Novo Cliente</span>
+      <ChevronRightIcon class="h-3 w-3 text-surface-400" />
+      <span class="font-semibold text-surface-900">Novo Cliente</span>
     </nav>
 
-    <div class="rounded-xl bg-white p-6 shadow-sm">
+    <div class="rounded-2xl border border-surface-200 bg-white p-6 shadow-sm">
       <form @submit.prevent="handleSubmit" class="space-y-4">
         <AppInput
           v-model="data.nome"
