@@ -42,12 +42,16 @@ async function handleLogin() {
       </div>
 
       <h1 class="mb-2 text-center text-2xl font-bold text-gray-900">Bem-vindo de volta</h1>
-      <p class="mb-8 text-center text-sm text-gray-500">
-        Faça login para acessar o sistema
-      </p>
+      <p class="mb-8 text-center text-sm text-gray-500">Faça login para acessar o sistema</p>
 
       <form @submit.prevent="handleLogin" class="space-y-5">
-        <AppInput v-model="email" label="E-mail" type="email" placeholder="seu@email.com" required />
+        <AppInput
+          v-model="email"
+          label="E-mail"
+          type="email"
+          placeholder="seu@email.com"
+          required
+        />
 
         <AppInput
           v-model="password"
@@ -59,9 +63,7 @@ async function handleLogin() {
 
         <p v-if="error" class="text-sm text-danger-600">{{ error }}</p>
 
-        <AppButton type="submit" :loading="loading" class="w-full">
-          Entrar
-        </AppButton>
+        <AppButton type="submit" :loading="loading" class="w-full"> Entrar </AppButton>
       </form>
     </div>
   </div>

@@ -45,7 +45,10 @@ const colors = {
       >
         <component :is="icons[notification.type]" class="h-5 w-5 shrink-0" />
         <p class="flex-1 text-sm font-medium">{{ notification.message }}</p>
-        <button class="shrink-0 opacity-60 hover:opacity-100" @click="ui.removeNotification(notification.id)">
+        <button
+          class="shrink-0 opacity-60 hover:opacity-100"
+          @click="ui.removeNotification(notification.id)"
+        >
           <XMarkIcon class="h-4 w-4" />
         </button>
       </div>
