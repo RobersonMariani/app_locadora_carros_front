@@ -1,5 +1,11 @@
+export type LocacaoStatus = 'reservada' | 'ativa' | 'finalizada' | 'cancelada'
+
 export interface Locacao {
   id: number
+  status: string
+  status_label: string
+  valor_total: number | null
+  observacoes: string | null
   cliente_id: number
   carro_id: number
   data_inicio_periodo: string

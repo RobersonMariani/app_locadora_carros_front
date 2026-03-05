@@ -13,7 +13,14 @@ import { useUiStore } from '@/stores/ui.store'
 const route = useRoute()
 const router = useRouter()
 const uiStore = useUiStore()
-const { data, errors, processing, submit, reset } = useForm({ nome: '' })
+const { data, errors, processing, submit, reset } = useForm({
+  nome: '',
+  cpf: '',
+  email: '',
+  telefone: '',
+  data_nascimento: '',
+  cnh: '',
+})
 
 const id = computed(() => Number(route.params.id))
 
@@ -21,6 +28,11 @@ async function loadCliente() {
   const { data: cliente } = await clienteService.show(id.value)
   reset()
   data.value.nome = cliente.nome
+  data.value.cpf = cliente.cpf
+  data.value.email = cliente.email ?? ''
+  data.value.telefone = cliente.telefone ?? ''
+  data.value.data_nascimento = cliente.data_nascimento ?? ''
+  data.value.cnh = cliente.cnh ?? ''
 }
 
 async function handleSubmit() {
@@ -36,7 +48,14 @@ async function handleSubmit() {
   }
 
   await submit(async (formData) => {
-    await clienteService.update(id.value, formData)
+    const payload = {
+      ...formData,
+      email: formData.email || undefined,
+      telefone: formData.telefone || undefined,
+      data_nascimento: formData.data_nascimento || undefined,
+      cnh: formData.cnh || undefined,
+    }
+    await clienteService.update(id.value, payload)
     uiStore.notify('success', 'Cliente atualizado com sucesso.')
     router.push({ name: 'clientes' })
   })
@@ -61,6 +80,38 @@ onMounted(loadCliente)
           placeholder="Nome do cliente"
           required
           :error="errors.nome"
+        />
+        <AppInput
+          v-model="data.cpf"
+          label="CPF"
+          placeholder="000.000.000-00"
+          required
+          :error="errors.cpf"
+        />
+        <AppInput
+          v-model="data.email"
+          label="Email"
+          type="email"
+          placeholder="email@exemplo.com"
+          :error="errors.email"
+        />
+        <AppInput
+          v-model="data.telefone"
+          label="Telefone"
+          placeholder="(00) 00000-0000"
+          :error="errors.telefone"
+        />
+        <AppInput
+          v-model="data.data_nascimento"
+          label="Data de Nascimento"
+          type="date"
+          :error="errors.data_nascimento"
+        />
+        <AppInput
+          v-model="data.cnh"
+          label="CNH"
+          placeholder="Número da CNH"
+          :error="errors.cnh"
         />
 
         <div class="flex gap-2 pt-4">

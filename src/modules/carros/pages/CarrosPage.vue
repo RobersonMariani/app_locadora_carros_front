@@ -94,6 +94,16 @@ onMounted(() => loadCarros(1))
               <th
                 class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-surface-500"
               >
+                Cor
+              </th>
+              <th
+                class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-surface-500"
+              >
+                Ano Fab/Mod
+              </th>
+              <th
+                class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-surface-500"
+              >
                 KM
               </th>
               <th
@@ -119,6 +129,12 @@ onMounted(() => loadCarros(1))
               </td>
               <td class="whitespace-nowrap px-6 py-4 text-sm text-surface-900">
                 {{ modeloNome(carro) }}
+              </td>
+              <td class="whitespace-nowrap px-6 py-4 text-sm text-surface-900">
+                {{ carro.cor }}
+              </td>
+              <td class="whitespace-nowrap px-6 py-4 text-sm text-surface-900">
+                {{ carro.ano_fabricacao }}/{{ carro.ano_modelo }}
               </td>
               <td class="whitespace-nowrap px-6 py-4 text-sm text-surface-900">
                 {{ carro.km.toLocaleString('pt-BR') }}

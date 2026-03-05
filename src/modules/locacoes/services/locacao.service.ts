@@ -1,6 +1,7 @@
 import http from '@/lib/http'
 import type { PaginatedResponse } from '@/types/api.types'
 import type { Locacao } from '../types/locacao.types'
+import type { FinalizarLocacaoDto } from '../dtos/locacao.dto'
 
 const BASE = '/v1/locacao'
 
@@ -29,5 +30,20 @@ export const locacaoService = {
 
   async remove(id: number): Promise<void> {
     await http.delete(`${BASE}/${id}`)
+  },
+
+  async iniciar(id: number): Promise<Locacao> {
+    const { data } = await http.patch<{ data: Locacao }>(`${BASE}/${id}/iniciar`)
+    return data.data
+  },
+
+  async finalizar(id: number, payload: FinalizarLocacaoDto): Promise<Locacao> {
+    const { data } = await http.patch<{ data: Locacao }>(`${BASE}/${id}/finalizar`, payload)
+    return data.data
+  },
+
+  async cancelar(id: number): Promise<Locacao> {
+    const { data } = await http.patch<{ data: Locacao }>(`${BASE}/${id}/cancelar`)
+    return data.data
   },
 }

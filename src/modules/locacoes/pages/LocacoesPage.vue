@@ -3,11 +3,15 @@ import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import AppButton from '@/components/ui/AppButton.vue'
 import AppModal from '@/components/ui/AppModal.vue'
+import StatusBadge from '@/components/ui/StatusBadge.vue'
+import FinalizarLocacaoModal from '../components/FinalizarLocacaoModal.vue'
 import { usePagination } from '@/composables/usePagination'
 import { formatDate } from '@/lib/date'
+import { locacaoService } from '../services/locacao.service'
 import { useLocacoesStore } from '@/stores/locacoes.store'
 import { useUiStore } from '@/stores/ui.store'
 import type { Locacao } from '../types/locacao.types'
+import type { LocacaoStatus } from '../types/locacao.types'
 
 const router = useRouter()
 const locacoesStore = useLocacoesStore()
@@ -16,6 +20,10 @@ const { meta, hasPages, hasPrevious, hasNext, setMeta, goToPage } = usePaginatio
 
 const deleteModalOpen = ref(false)
 const locacaoToDelete = ref<Locacao | null>(null)
+const cancelModalOpen = ref(false)
+const locacaoToCancel = ref<Locacao | null>(null)
+const finalizarModalOpen = ref(false)
+const locacaoToFinalizar = ref<Locacao | null>(null)
 
 async function loadLocacoes(page = 1) {
   await locacoesStore.fetchLocacoes(page)
@@ -32,6 +40,26 @@ function closeDeleteModal() {
   locacaoToDelete.value = null
 }
 
+function openCancelModal(locacao: Locacao) {
+  locacaoToCancel.value = locacao
+  cancelModalOpen.value = true
+}
+
+function closeCancelModal() {
+  cancelModalOpen.value = false
+  locacaoToCancel.value = null
+}
+
+function openFinalizarModal(locacao: Locacao) {
+  locacaoToFinalizar.value = locacao
+  finalizarModalOpen.value = true
+}
+
+function closeFinalizarModal() {
+  finalizarModalOpen.value = false
+  locacaoToFinalizar.value = null
+}
+
 async function confirmDelete() {
   if (!locacaoToDelete.value) return
   try {
@@ -42,6 +70,34 @@ async function confirmDelete() {
   } catch {
     uiStore.notify('error', 'Erro ao excluir locação.')
   }
+}
+
+async function confirmCancel() {
+  if (!locacaoToCancel.value) return
+  try {
+    await locacaoService.cancelar(locacaoToCancel.value.id)
+    uiStore.notify('success', 'Locação cancelada com sucesso.')
+    closeCancelModal()
+    await loadLocacoes(meta.value.current_page)
+  } catch {
+    uiStore.notify('error', 'Erro ao cancelar locação.')
+  }
+}
+
+async function handleIniciar(locacao: Locacao) {
+  try {
+    await locacaoService.iniciar(locacao.id)
+    uiStore.notify('success', 'Locação iniciada com sucesso.')
+    await loadLocacoes(meta.value.current_page)
+  } catch {
+    uiStore.notify('error', 'Erro ao iniciar locação.')
+  }
+}
+
+function onFinalizada() {
+  uiStore.notify('success', 'Locação finalizada com sucesso.')
+  closeFinalizarModal()
+  loadLocacoes(meta.value.current_page)
 }
 
 function goPrev() {
@@ -56,6 +112,10 @@ function goNext() {
 
 function formatCurrency(valor: number) {
   return valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
+}
+
+function periodoLabel(locacao: Locacao) {
+  return `${formatDate(locacao.data_inicio_periodo)} - ${formatDate(locacao.data_final_previsto_periodo)}`
 }
 
 onMounted(() => loadLocacoes(1))
@@ -95,17 +155,12 @@ onMounted(() => loadLocacoes(1))
               <th
                 class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-surface-500"
               >
-                Data Início
+                Status
               </th>
               <th
                 class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-surface-500"
               >
-                Data Prevista
-              </th>
-              <th
-                class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-surface-500"
-              >
-                Data Realizada
+                Período
               </th>
               <th
                 class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-surface-500"
@@ -115,12 +170,7 @@ onMounted(() => loadLocacoes(1))
               <th
                 class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-surface-500"
               >
-                KM Inicial
-              </th>
-              <th
-                class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-surface-500"
-              >
-                KM Final
+                Valor Total
               </th>
               <th
                 class="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-surface-500"
@@ -141,40 +191,75 @@ onMounted(() => loadLocacoes(1))
               <td class="whitespace-nowrap px-6 py-4 text-sm text-surface-900">
                 {{ locacao.carro?.placa ?? '-' }}
               </td>
-              <td class="whitespace-nowrap px-6 py-4 text-sm text-surface-500">
-                {{ formatDate(locacao.data_inicio_periodo) }}
+              <td class="whitespace-nowrap px-6 py-4 text-sm">
+                <StatusBadge
+                  :status="(locacao.status as LocacaoStatus)"
+                  :label="locacao.status_label"
+                />
               </td>
               <td class="whitespace-nowrap px-6 py-4 text-sm text-surface-500">
-                {{ formatDate(locacao.data_final_previsto_periodo) }}
-              </td>
-              <td class="whitespace-nowrap px-6 py-4 text-sm text-surface-500">
-                {{ formatDate(locacao.data_final_realizado_periodo) ?? '-' }}
+                {{ periodoLabel(locacao) }}
               </td>
               <td class="whitespace-nowrap px-6 py-4 text-sm text-surface-900">
                 {{ formatCurrency(locacao.valor_diaria) }}
               </td>
-              <td class="whitespace-nowrap px-6 py-4 text-sm text-surface-500">
-                {{ locacao.km_inicial }}
-              </td>
-              <td class="whitespace-nowrap px-6 py-4 text-sm text-surface-500">
-                {{ locacao.km_final ?? '-' }}
+              <td class="whitespace-nowrap px-6 py-4 text-sm text-surface-900">
+                {{ locacao.valor_total != null ? formatCurrency(locacao.valor_total) : '-' }}
               </td>
               <td class="whitespace-nowrap px-6 py-4 text-right text-sm">
-                <AppButton
-                  variant="ghost"
-                  size="sm"
-                  @click="router.push({ name: 'locacoes.edit', params: { id: locacao.id } })"
-                >
-                  Editar
-                </AppButton>
-                <AppButton
-                  variant="danger"
-                  size="sm"
-                  class="ml-2"
-                  @click="openDeleteModal(locacao)"
-                >
-                  Excluir
-                </AppButton>
+                <template v-if="locacao.status === 'reservada'">
+                  <AppButton
+                    variant="success"
+                    size="sm"
+                    @click="handleIniciar(locacao)"
+                  >
+                    Iniciar
+                  </AppButton>
+                  <AppButton
+                    variant="ghost"
+                    size="sm"
+                    class="ml-2"
+                    @click="router.push({ name: 'locacoes.edit', params: { id: locacao.id } })"
+                  >
+                    Editar
+                  </AppButton>
+                  <AppButton
+                    variant="danger"
+                    size="sm"
+                    class="ml-2"
+                    @click="openCancelModal(locacao)"
+                  >
+                    Cancelar
+                  </AppButton>
+                  <AppButton
+                    variant="danger"
+                    size="sm"
+                    class="ml-2"
+                    @click="openDeleteModal(locacao)"
+                  >
+                    Excluir
+                  </AppButton>
+                </template>
+                <template v-else-if="locacao.status === 'ativa'">
+                  <AppButton
+                    variant="primary"
+                    size="sm"
+                    @click="openFinalizarModal(locacao)"
+                  >
+                    Finalizar
+                  </AppButton>
+                  <AppButton
+                    variant="danger"
+                    size="sm"
+                    class="ml-2"
+                    @click="openCancelModal(locacao)"
+                  >
+                    Cancelar
+                  </AppButton>
+                </template>
+                <template v-else-if="locacao.status === 'finalizada' || locacao.status === 'cancelada'">
+                  —
+                </template>
               </td>
             </tr>
           </tbody>
@@ -217,5 +302,31 @@ onMounted(() => loadLocacoes(1))
         <AppButton variant="danger" @click="confirmDelete">Excluir</AppButton>
       </div>
     </AppModal>
+
+    <AppModal
+      :open="cancelModalOpen"
+      title="Cancelar locação"
+      max-width="sm"
+      @close="closeCancelModal"
+    >
+      <p v-if="locacaoToCancel" class="text-surface-600">
+        Tem certeza que deseja cancelar esta locação?
+        <span v-if="locacaoToCancel.cliente || locacaoToCancel.carro">
+          (Cliente: {{ locacaoToCancel.cliente?.nome ?? '-' }}, Carro:
+          {{ locacaoToCancel.carro?.placa ?? '-' }})
+        </span>
+      </p>
+      <div class="mt-6 flex justify-end gap-2">
+        <AppButton variant="secondary" @click="closeCancelModal">Cancelar</AppButton>
+        <AppButton variant="danger" @click="confirmCancel">Cancelar locação</AppButton>
+      </div>
+    </AppModal>
+
+    <FinalizarLocacaoModal
+      :open="finalizarModalOpen"
+      :locacao-id="locacaoToFinalizar?.id ?? 0"
+      @close="closeFinalizarModal"
+      @finalizada="onFinalizada"
+    />
   </div>
 </template>

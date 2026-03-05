@@ -5,7 +5,6 @@ import { UserGroupIcon } from '@heroicons/vue/24/outline'
 import AppButton from '@/components/ui/AppButton.vue'
 import AppModal from '@/components/ui/AppModal.vue'
 import { usePagination } from '@/composables/usePagination'
-import { formatDateTime } from '@/lib/date'
 import { useClientesStore } from '@/stores/clientes.store'
 import { useUiStore } from '@/stores/ui.store'
 
@@ -108,7 +107,17 @@ onMounted(() => loadClientes(1))
               <th
                 class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-surface-500"
               >
-                Criado em
+                CPF
+              </th>
+              <th
+                class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-surface-500"
+              >
+                Email
+              </th>
+              <th
+                class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-surface-500"
+              >
+                Telefone
               </th>
               <th
                 class="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-surface-500"
@@ -127,7 +136,13 @@ onMounted(() => loadClientes(1))
                 {{ cliente.nome }}
               </td>
               <td class="whitespace-nowrap px-6 py-4 text-sm text-surface-500">
-                {{ formatDateTime(cliente.created_at) }}
+                {{ cliente.cpf }}
+              </td>
+              <td class="whitespace-nowrap px-6 py-4 text-sm text-surface-500">
+                {{ cliente.email || '—' }}
+              </td>
+              <td class="whitespace-nowrap px-6 py-4 text-sm text-surface-500">
+                {{ cliente.telefone || '—' }}
               </td>
               <td class="whitespace-nowrap px-6 py-4 text-right text-sm">
                 <AppButton

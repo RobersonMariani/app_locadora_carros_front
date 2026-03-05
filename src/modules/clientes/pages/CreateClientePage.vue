@@ -11,7 +11,14 @@ import { useUiStore } from '@/stores/ui.store'
 
 const router = useRouter()
 const uiStore = useUiStore()
-const { data, errors, processing, submit } = useForm({ nome: '' })
+const { data, errors, processing, submit } = useForm({
+  nome: '',
+  cpf: '',
+  email: '',
+  telefone: '',
+  data_nascimento: '',
+  cnh: '',
+})
 
 async function handleSubmit() {
   const parsed = createClienteSchema.safeParse(data.value)
@@ -26,7 +33,14 @@ async function handleSubmit() {
   }
 
   await submit(async (formData) => {
-    await clienteService.create(formData)
+    const payload = {
+      ...formData,
+      email: formData.email || undefined,
+      telefone: formData.telefone || undefined,
+      data_nascimento: formData.data_nascimento || undefined,
+      cnh: formData.cnh || undefined,
+    }
+    await clienteService.create(payload)
     uiStore.notify('success', 'Cliente criado com sucesso.')
     router.push({ name: 'clientes' })
   })
@@ -49,6 +63,38 @@ async function handleSubmit() {
           placeholder="Nome do cliente"
           required
           :error="errors.nome"
+        />
+        <AppInput
+          v-model="data.cpf"
+          label="CPF"
+          placeholder="000.000.000-00"
+          required
+          :error="errors.cpf"
+        />
+        <AppInput
+          v-model="data.email"
+          label="Email"
+          type="email"
+          placeholder="email@exemplo.com"
+          :error="errors.email"
+        />
+        <AppInput
+          v-model="data.telefone"
+          label="Telefone"
+          placeholder="(00) 00000-0000"
+          :error="errors.telefone"
+        />
+        <AppInput
+          v-model="data.data_nascimento"
+          label="Data de Nascimento"
+          type="date"
+          :error="errors.data_nascimento"
+        />
+        <AppInput
+          v-model="data.cnh"
+          label="CNH"
+          placeholder="Número da CNH"
+          :error="errors.cnh"
         />
 
         <div class="flex gap-2 pt-4">

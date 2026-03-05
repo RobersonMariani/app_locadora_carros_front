@@ -21,10 +21,9 @@ const { data, errors, processing, submit, reset } = useForm({
   carro_id: '' as string | number,
   data_inicio_periodo: '',
   data_final_previsto_periodo: '',
-  data_final_realizado_periodo: '',
   valor_diaria: '' as string | number,
   km_inicial: '' as string | number,
-  km_final: '' as string | number,
+  observacoes: '',
 })
 
 const clienteOptions = ref<{ value: number; label: string }[]>([])
@@ -41,12 +40,9 @@ async function loadLocacao() {
   data.value.carro_id = locacao.carro_id
   data.value.data_inicio_periodo = formatDateISO(locacao.data_inicio_periodo)
   data.value.data_final_previsto_periodo = formatDateISO(locacao.data_final_previsto_periodo)
-  data.value.data_final_realizado_periodo = locacao.data_final_realizado_periodo
-    ? formatDateISO(locacao.data_final_realizado_periodo)
-    : ''
   data.value.valor_diaria = locacao.valor_diaria
   data.value.km_inicial = locacao.km_inicial
-  data.value.km_final = locacao.km_final ?? ''
+  data.value.observacoes = locacao.observacoes ?? ''
 }
 
 onMounted(async () => {
@@ -77,7 +73,7 @@ function buildPayload() {
   const carroId = data.value.carro_id ? Number(data.value.carro_id) : 0
   const valorDiaria = data.value.valor_diaria !== '' ? Number(data.value.valor_diaria) : 0
   const kmInicial = data.value.km_inicial !== '' ? Number(data.value.km_inicial) : 0
-  const kmFinal = data.value.km_final !== '' ? Number(data.value.km_final) : null
+  const observacoes = data.value.observacoes?.trim() || null
 
   const payload: Record<string, unknown> = {
     cliente_id: clienteId,
@@ -86,18 +82,7 @@ function buildPayload() {
     data_final_previsto_periodo: data.value.data_final_previsto_periodo,
     valor_diaria: valorDiaria,
     km_inicial: kmInicial,
-  }
-
-  if (data.value.data_final_realizado_periodo) {
-    payload.data_final_realizado_periodo = data.value.data_final_realizado_periodo
-  } else {
-    payload.data_final_realizado_periodo = null
-  }
-
-  if (kmFinal !== null) {
-    payload.km_final = kmFinal
-  } else {
-    payload.km_final = null
+    observacoes,
   }
 
   return payload
@@ -110,10 +95,9 @@ async function handleSubmit() {
     carro_id: payload.carro_id,
     data_inicio_periodo: payload.data_inicio_periodo,
     data_final_previsto_periodo: payload.data_final_previsto_periodo,
-    data_final_realizado_periodo: payload.data_final_realizado_periodo || '',
     valor_diaria: payload.valor_diaria,
     km_inicial: payload.km_inicial,
-    km_final: payload.km_final,
+    observacoes: payload.observacoes || '',
   })
 
   if (!parsed.success) {
@@ -183,13 +167,6 @@ async function handleSubmit() {
         />
 
         <AppInput
-          v-model="data.data_final_realizado_periodo"
-          type="date"
-          label="Data Final Realizado Período (opcional)"
-          :error="errors.data_final_realizado_periodo"
-        />
-
-        <AppInput
           v-model="data.valor_diaria"
           type="number"
           step="0.01"
@@ -208,13 +185,23 @@ async function handleSubmit() {
           :error="errors.km_inicial"
         />
 
-        <AppInput
-          v-model="data.km_final"
-          type="number"
-          label="KM Final (opcional)"
-          placeholder="0"
-          :error="errors.km_final"
-        />
+        <div>
+          <label class="mb-1.5 block text-sm font-medium text-surface-700">Observações</label>
+          <textarea
+            v-model="data.observacoes"
+            rows="3"
+            placeholder="Observações (opcional)"
+            :class="[
+              'w-full rounded-xl border px-4 py-2.5 text-sm transition-all duration-200 placeholder:text-surface-400',
+              errors.observacoes
+                ? 'border-danger-400 bg-danger-50/50 focus:border-danger-500 focus:ring-2 focus:ring-danger-500/20'
+                : 'border-surface-200 bg-white focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20',
+            ]"
+          />
+          <p v-if="errors.observacoes" class="mt-1.5 text-xs font-medium text-danger-600">
+            {{ errors.observacoes }}
+          </p>
+        </div>
 
         <div class="flex gap-2 pt-4">
           <AppButton type="submit" :loading="processing"> Salvar </AppButton>
