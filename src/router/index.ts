@@ -90,6 +90,21 @@ const router = createRouter({
       name: 'locacoes.edit',
       component: () => import('@/modules/locacoes/pages/EditLocacaoPage.vue'),
     },
+    {
+      path: '/pagamentos',
+      name: 'pagamentos',
+      component: () => import('@/modules/pagamentos/pages/PagamentosPage.vue'),
+    },
+    {
+      path: '/pagamentos/criar',
+      name: 'pagamentos.create',
+      component: () => import('@/modules/pagamentos/pages/CreatePagamentoPage.vue'),
+    },
+    {
+      path: '/pagamentos/:id/editar',
+      name: 'pagamentos.edit',
+      component: () => import('@/modules/pagamentos/pages/EditPagamentoPage.vue'),
+    },
   ],
 })
 

@@ -14,6 +14,7 @@ import {
   CubeIcon,
   TruckIcon,
   ClipboardDocumentListIcon,
+  BanknotesIcon,
   ChevronLeftIcon,
   UserCircleIcon,
 } from '@heroicons/vue/24/outline'
@@ -30,6 +31,7 @@ const navigation = [
   { name: 'Modelos', route: 'modelos', icon: CubeIcon },
   { name: 'Carros', route: 'carros', icon: TruckIcon },
   { name: 'Locações', route: 'locacoes', icon: ClipboardDocumentListIcon },
+  { name: 'Pagamentos', route: 'pagamentos', icon: BanknotesIcon },
 ]
 
 onMounted(async () => {
