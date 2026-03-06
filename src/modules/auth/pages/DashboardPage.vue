@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth.store'
 import { dashboardService } from '@/modules/auth/services/dashboard.service'
 import {
@@ -11,22 +12,35 @@ import {
   ClockIcon,
   BanknotesIcon,
   CubeIcon,
+  WrenchScrewdriverIcon,
+  ExclamationCircleIcon,
+  BellAlertIcon,
 } from '@heroicons/vue/24/outline'
 
 const auth = useAuthStore()
+const router = useRouter()
 const loading = ref(true)
 const error = ref<string | null>(null)
 
 const resumo = ref<{
-  total_marcas: number
-  total_modelos: number
-  total_carros: number
-  total_clientes: number
-  carros_disponiveis: number
-  carros_locados: number
-  locacoes_ativas: number
-  locacoes_reservadas: number
-  faturamento_mes: number
+  total_marcas?: number
+  total_modelos?: number
+  total_carros?: number
+  total_clientes?: number
+  carros_disponiveis?: number
+  carros_locados?: number
+  carros_em_manutencao?: number
+  taxa_ocupacao?: number
+  locacoes_ativas?: number
+  locacoes_reservadas?: number
+  locacoes_atrasadas?: number
+  faturamento_mes?: number
+  total_multas_pendentes?: number
+  valor_multas_pendentes?: number
+  total_a_receber?: number
+  total_recebido_mes?: number
+  manutencoes_proximas?: number
+  alertas_nao_lidos?: number
 } | null>(null)
 
 const locacoesPorStatus = ref<Array<{ status: string; label: string; quantidade: number }>>([])
@@ -79,64 +93,38 @@ function getStatusColor(status: string): { bg: string; text: string; border: str
   return { bg: 'bg-surface-50', text: 'text-surface-700', border: 'border-surface-200' }
 }
 
-const summaryCards = [
-  {
-    key: 'total_carros',
-    title: 'Total de Carros',
-    icon: TruckIcon,
-    color: 'primary',
-    getValue: (r: NonNullable<typeof resumo.value>) => r.total_carros,
-  },
-  {
-    key: 'carros_disponiveis',
-    title: 'Carros Disponíveis',
-    icon: CheckCircleIcon,
-    color: 'success',
-    getValue: (r: NonNullable<typeof resumo.value>) => r.carros_disponiveis,
-  },
-  {
-    key: 'carros_locados',
-    title: 'Carros Locados',
-    icon: XCircleIcon,
-    color: 'warning',
-    getValue: (r: NonNullable<typeof resumo.value>) => r.carros_locados,
-  },
-  {
-    key: 'total_clientes',
-    title: 'Total de Clientes',
-    icon: UsersIcon,
-    color: 'primary',
-    getValue: (r: NonNullable<typeof resumo.value>) => r.total_clientes,
-  },
-  {
-    key: 'locacoes_ativas',
-    title: 'Locações Ativas',
-    icon: PlayIcon,
-    color: 'primary',
-    getValue: (r: NonNullable<typeof resumo.value>) => r.locacoes_ativas,
-  },
-  {
-    key: 'locacoes_reservadas',
-    title: 'Locações Reservadas',
-    icon: ClockIcon,
-    color: 'warning',
-    getValue: (r: NonNullable<typeof resumo.value>) => r.locacoes_reservadas,
-  },
-  {
-    key: 'faturamento_mes',
-    title: 'Faturamento do Mês',
-    icon: BanknotesIcon,
-    color: 'success',
-    getValue: (r: NonNullable<typeof resumo.value>) => r.faturamento_mes,
-    format: formatarMoeda,
-  },
-  {
-    key: 'total_modelos',
-    title: 'Total de Modelos',
-    icon: CubeIcon,
-    color: 'accent',
-    getValue: (r: NonNullable<typeof resumo.value>) => r.total_modelos,
-  },
+interface CardConfig {
+  key: string
+  title: string
+  icon: typeof TruckIcon
+  color: string
+  getValue: (r: NonNullable<typeof resumo.value>) => number | string
+  format?: (v: number) => string
+  badgeDanger?: (r: NonNullable<typeof resumo.value>) => boolean
+  badgeWarning?: (r: NonNullable<typeof resumo.value>) => boolean
+  linkTo?: string
+}
+
+const frotaCards: CardConfig[] = [
+  { key: 'total_carros', title: 'Total de Carros', icon: TruckIcon, color: 'primary', getValue: (r) => r.total_carros ?? 0 },
+  { key: 'carros_disponiveis', title: 'Carros Disponíveis', icon: CheckCircleIcon, color: 'success', getValue: (r) => r.carros_disponiveis ?? 0 },
+  { key: 'carros_locados', title: 'Carros Locados', icon: XCircleIcon, color: 'warning', getValue: (r) => r.carros_locados ?? 0 },
+  { key: 'carros_em_manutencao', title: 'Carros em Manutenção', icon: WrenchScrewdriverIcon, color: 'warning', getValue: (r) => r.carros_em_manutencao ?? 0 },
+  { key: 'taxa_ocupacao', title: 'Taxa de Ocupação', icon: CubeIcon, color: 'primary', getValue: (r) => r.taxa_ocupacao ?? 0, format: (v) => `${v}%` },
+]
+
+const financeiroCards: CardConfig[] = [
+  { key: 'faturamento_mes', title: 'Faturamento do Mês', icon: BanknotesIcon, color: 'success', getValue: (r) => r.faturamento_mes ?? 0, format: formatarMoeda },
+  { key: 'total_a_receber', title: 'Total a Receber', icon: BanknotesIcon, color: 'primary', getValue: (r) => r.total_a_receber ?? 0, format: formatarMoeda },
+  { key: 'total_recebido_mes', title: 'Recebido no Mês', icon: BanknotesIcon, color: 'success', getValue: (r) => r.total_recebido_mes ?? 0, format: formatarMoeda },
+]
+
+const atencaoCards: CardConfig[] = [
+  { key: 'locacoes_atrasadas', title: 'Locações Atrasadas', icon: ExclamationCircleIcon, color: 'danger', getValue: (r) => r.locacoes_atrasadas ?? 0, badgeDanger: (r) => (r.locacoes_atrasadas ?? 0) > 0 },
+  { key: 'total_multas_pendentes', title: 'Multas Pendentes', icon: BanknotesIcon, color: 'warning', getValue: (r) => r.total_multas_pendentes ?? 0 },
+  { key: 'valor_multas_pendentes', title: 'Valor Multas Pendentes', icon: BanknotesIcon, color: 'warning', getValue: (r) => r.valor_multas_pendentes ?? 0, format: formatarMoeda },
+  { key: 'manutencoes_proximas', title: 'Manutenções Próximas', icon: WrenchScrewdriverIcon, color: 'warning', getValue: (r) => r.manutencoes_proximas ?? 0, badgeWarning: (r) => (r.manutencoes_proximas ?? 0) > 0 },
+  { key: 'alertas_nao_lidos', title: 'Alertas Não Lidos', icon: BellAlertIcon, color: 'primary', getValue: (r) => r.alertas_nao_lidos ?? 0, badgeDanger: (r) => (r.alertas_nao_lidos ?? 0) > 0, linkTo: 'alertas' },
 ]
 
 const colorClasses: Record<string, { bg: string; icon: string; shadow: string }> = {
@@ -144,6 +132,7 @@ const colorClasses: Record<string, { bg: string; icon: string; shadow: string }>
   success: { bg: 'bg-success-50', icon: 'text-success-600', shadow: 'shadow-success-600/20' },
   warning: { bg: 'bg-warning-50', icon: 'text-warning-600', shadow: 'shadow-warning-600/20' },
   accent: { bg: 'bg-primary-50', icon: 'text-accent-600', shadow: 'shadow-accent-600/20' },
+  danger: { bg: 'bg-danger-50', icon: 'text-danger-600', shadow: 'shadow-danger-600/20' },
 }
 
 async function carregarDados() {
@@ -189,26 +178,19 @@ onMounted(() => {
       {{ error }}
     </div>
 
-    <!-- Seção 2: Cards de resumo -->
+    <!-- Seção 2: Frota -->
     <section class="mb-10">
       <h2 class="mb-4 text-sm font-semibold uppercase tracking-wider text-surface-400">
-        Resumo geral
+        Frota
       </h2>
 
       <div v-if="loading" class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <div
-          v-for="i in 8"
-          :key="i"
-          class="h-32 animate-pulse rounded-2xl bg-surface-100"
-        />
+        <div v-for="i in 5" :key="i" class="h-32 animate-pulse rounded-2xl bg-surface-100" />
       </div>
 
-      <div
-        v-else
-        class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4"
-      >
+      <div v-else class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <div
-          v-for="card in summaryCards"
+          v-for="card in frotaCards"
           :key="card.key"
           class="group relative overflow-hidden rounded-2xl border border-surface-200 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl"
         >
@@ -219,6 +201,7 @@ onMounted(() => {
               'bg-success-500': card.color === 'success',
               'bg-warning-500': card.color === 'warning',
               'bg-accent-500': card.color === 'accent',
+              'bg-danger-500': card.color === 'danger',
             }"
           />
           <div class="relative flex items-start gap-4">
@@ -236,7 +219,7 @@ onMounted(() => {
             <div class="min-w-0 flex-1">
               <p class="text-sm font-medium text-surface-500">{{ card.title }}</p>
               <p class="mt-1 text-2xl font-bold text-surface-900">
-                {{ resumo ? (card.format ? card.format(card.getValue(resumo)) : card.getValue(resumo)) : '—' }}
+                {{ resumo ? (card.format ? card.format(Number(card.getValue(resumo))) : card.getValue(resumo)) : '—' }}
               </p>
             </div>
           </div>
@@ -244,7 +227,122 @@ onMounted(() => {
       </div>
     </section>
 
-    <!-- Seção 3: Locações por Status -->
+    <!-- Seção 3: Financeiro -->
+    <section class="mb-10">
+      <h2 class="mb-4 text-sm font-semibold uppercase tracking-wider text-surface-400">
+        Financeiro
+      </h2>
+
+      <div v-if="loading" class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div v-for="i in 3" :key="i" class="h-32 animate-pulse rounded-2xl bg-surface-100" />
+      </div>
+
+      <div v-else class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div
+          v-for="card in financeiroCards"
+          :key="card.key"
+          class="group relative overflow-hidden rounded-2xl border border-surface-200 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl"
+        >
+          <div
+            class="absolute -right-4 -top-4 h-24 w-24 rounded-full opacity-[0.07] transition-transform duration-300 group-hover:scale-150"
+            :class="{
+              'bg-primary-500': card.color === 'primary',
+              'bg-success-500': card.color === 'success',
+              'bg-warning-500': card.color === 'warning',
+            }"
+          />
+          <div class="relative flex items-start gap-4">
+            <div
+              :class="[
+                'flex h-12 w-12 shrink-0 items-center justify-center rounded-xl',
+                colorClasses[card.color]?.bg ?? 'bg-surface-100',
+              ]"
+            >
+              <component
+                :is="card.icon"
+                :class="['h-6 w-6', colorClasses[card.color]?.icon ?? 'text-surface-600']"
+              />
+            </div>
+            <div class="min-w-0 flex-1">
+              <p class="text-sm font-medium text-surface-500">{{ card.title }}</p>
+              <p class="mt-1 text-2xl font-bold text-surface-900">
+                {{ resumo ? (card.format ? card.format(Number(card.getValue(resumo))) : card.getValue(resumo)) : '—' }}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Seção 4: Atenção -->
+    <section class="mb-10">
+      <h2 class="mb-4 text-sm font-semibold uppercase tracking-wider text-surface-400">
+        Atenção
+      </h2>
+
+      <div v-if="loading" class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div v-for="i in 5" :key="i" class="h-32 animate-pulse rounded-2xl bg-surface-100" />
+      </div>
+
+      <div v-else class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div
+          v-for="card in atencaoCards"
+          :key="card.key"
+          :class="[
+            'group relative overflow-hidden rounded-2xl border border-surface-200 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl',
+            card.linkTo && 'cursor-pointer',
+          ]"
+          role="button"
+          tabindex="0"
+          @click="card.linkTo ? router.push({ name: card.linkTo }) : undefined"
+          @keydown.enter="card.linkTo ? router.push({ name: card.linkTo }) : undefined"
+        >
+          <div
+            class="absolute -right-4 -top-4 h-24 w-24 rounded-full opacity-[0.07] transition-transform duration-300 group-hover:scale-150"
+            :class="{
+              'bg-primary-500': card.color === 'primary',
+              'bg-warning-500': card.color === 'warning',
+              'bg-danger-500': card.color === 'danger',
+            }"
+          />
+          <div class="relative flex items-start gap-4">
+            <div
+              :class="[
+                'flex h-12 w-12 shrink-0 items-center justify-center rounded-xl',
+                colorClasses[card.color]?.bg ?? 'bg-surface-100',
+              ]"
+            >
+              <component
+                :is="card.icon"
+                :class="['h-6 w-6', colorClasses[card.color]?.icon ?? 'text-surface-600']"
+              />
+            </div>
+            <div class="min-w-0 flex-1">
+              <p class="flex items-center gap-2 text-sm font-medium text-surface-500">
+                {{ card.title }}
+                <span
+                  v-if="resumo && card.badgeDanger?.(resumo)"
+                  class="rounded-full bg-danger-500 px-2 py-0.5 text-[10px] font-bold text-white"
+                >
+                  !
+                </span>
+                <span
+                  v-if="resumo && card.badgeWarning?.(resumo)"
+                  class="rounded-full bg-warning-500 px-2 py-0.5 text-[10px] font-bold text-white"
+                >
+                  !
+                </span>
+              </p>
+              <p class="mt-1 text-2xl font-bold text-surface-900">
+                {{ resumo ? (card.format ? card.format(Number(card.getValue(resumo))) : card.getValue(resumo)) : '—' }}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Seção 5: Locações por Status -->
     <section class="mb-10">
       <h2 class="mb-4 text-sm font-semibold uppercase tracking-wider text-surface-400">
         Locações por status
@@ -279,7 +377,7 @@ onMounted(() => {
       </div>
     </section>
 
-    <!-- Seção 4: Faturamento Mensal -->
+    <!-- Seção 6: Faturamento Mensal -->
     <section>
       <h2 class="mb-4 text-sm font-semibold uppercase tracking-wider text-surface-400">
         Faturamento mensal

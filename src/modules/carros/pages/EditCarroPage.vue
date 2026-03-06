@@ -23,6 +23,28 @@ const COR_OPCOES = [
   { value: 'Cinza', label: 'Cinza' },
   { value: 'Outro', label: 'Outro' },
 ]
+const COMBUSTIVEL_OPCOES = [
+  { value: 'flex', label: 'Flex' },
+  { value: 'gasolina', label: 'Gasolina' },
+  { value: 'etanol', label: 'Etanol' },
+  { value: 'diesel', label: 'Diesel' },
+  { value: 'eletrico', label: 'Elétrico' },
+  { value: 'hibrido', label: 'Híbrido' },
+]
+const CAMBIO_OPCOES = [
+  { value: 'manual', label: 'Manual' },
+  { value: 'automatico', label: 'Automático' },
+  { value: 'cvt', label: 'CVT' },
+]
+const CATEGORIA_OPCOES = [
+  { value: 'economico', label: 'Econômico' },
+  { value: 'compacto', label: 'Compacto' },
+  { value: 'sedan', label: 'Sedan' },
+  { value: 'suv', label: 'SUV' },
+  { value: 'pickup', label: 'Pickup' },
+  { value: 'luxo', label: 'Luxo' },
+  { value: 'van', label: 'Van' },
+]
 
 const { data, errors, processing, submit, reset } = useForm({
   modelo_id: '' as string | number,
@@ -33,6 +55,11 @@ const { data, errors, processing, submit, reset } = useForm({
   renavam: '',
   disponivel: true,
   km: '' as string | number,
+  combustivel: '',
+  cambio: '',
+  categoria: '',
+  ar_condicionado: false,
+  diaria_padrao: '' as string | number,
 })
 
 const id = computed(() => Number(route.params.id))
@@ -60,6 +87,11 @@ onMounted(async () => {
     data.value.renavam = carro.renavam ?? ''
     data.value.disponivel = carro.disponivel
     data.value.km = carro.km
+    data.value.combustivel = carro.combustivel ?? ''
+    data.value.cambio = carro.cambio ?? ''
+    data.value.categoria = carro.categoria ?? ''
+    data.value.ar_condicionado = carro.ar_condicionado ?? false
+    data.value.diaria_padrao = carro.diaria_padrao ?? ''
   } finally {
     loadingModelos.value = false
   }
@@ -70,6 +102,7 @@ async function handleSubmit() {
   const km = data.value.km !== '' ? Number(data.value.km) : 0
   const anoFab = data.value.ano_fabricacao !== '' ? Number(data.value.ano_fabricacao) : undefined
   const anoMod = data.value.ano_modelo !== '' ? Number(data.value.ano_modelo) : undefined
+  const diariaPadrao = data.value.diaria_padrao !== '' ? Number(data.value.diaria_padrao) : null
   const payload = {
     modelo_id: modeloId || undefined,
     placa: data.value.placa || undefined,
@@ -79,6 +112,11 @@ async function handleSubmit() {
     renavam: data.value.renavam === '' ? null : data.value.renavam || undefined,
     disponivel: data.value.disponivel,
     km: km || undefined,
+    combustivel: data.value.combustivel || undefined,
+    cambio: data.value.cambio || undefined,
+    categoria: data.value.categoria || undefined,
+    ar_condicionado: data.value.ar_condicionado,
+    diaria_padrao: diariaPadrao,
   }
   const parsed = updateCarroSchema.safeParse(payload)
 
@@ -103,6 +141,11 @@ async function handleSubmit() {
     renavam?: string | null
     disponivel?: boolean
     km?: number
+    combustivel?: string
+    cambio?: string
+    categoria?: string
+    ar_condicionado?: boolean
+    diaria_padrao?: number | null
   }
 
   await submit(async () => {
@@ -187,14 +230,60 @@ async function handleSubmit() {
             :error="errors.km"
           />
 
-          <div class="flex items-center gap-2">
-            <input
-              v-model="data.disponivel"
-              type="checkbox"
-              id="disponivel"
-              class="rounded border-surface-300 text-primary-600 focus:ring-primary-500"
-            />
-            <label for="disponivel" class="text-sm font-medium text-surface-700">Disponível</label>
+          <AppSelect
+            v-model="data.combustivel"
+            label="Combustível"
+            placeholder="Selecione o combustível"
+            :options="COMBUSTIVEL_OPCOES"
+            :error="errors.combustivel"
+          />
+
+          <AppSelect
+            v-model="data.cambio"
+            label="Câmbio"
+            placeholder="Selecione o câmbio"
+            :options="CAMBIO_OPCOES"
+            :error="errors.cambio"
+          />
+
+          <AppSelect
+            v-model="data.categoria"
+            label="Categoria"
+            placeholder="Selecione a categoria"
+            :options="CATEGORIA_OPCOES"
+            :error="errors.categoria"
+          />
+
+          <AppInput
+            v-model="data.diaria_padrao"
+            type="number"
+            label="Diária Padrão (R$)"
+            placeholder="0,00"
+            step="0.01"
+            :error="errors.diaria_padrao"
+          />
+
+          <div class="flex flex-col gap-2">
+            <div class="flex items-center gap-2">
+              <input
+                v-model="data.disponivel"
+                type="checkbox"
+                id="disponivel"
+                class="rounded border-surface-300 text-primary-600 focus:ring-primary-500"
+              />
+              <label for="disponivel" class="text-sm font-medium text-surface-700">Disponível</label>
+            </div>
+            <div class="flex items-center gap-2">
+              <input
+                v-model="data.ar_condicionado"
+                type="checkbox"
+                id="ar_condicionado"
+                class="rounded border-surface-300 text-primary-600 focus:ring-primary-500"
+              />
+              <label for="ar_condicionado" class="text-sm font-medium text-surface-700"
+                >Ar Condicionado</label
+              >
+            </div>
           </div>
         </div>
 

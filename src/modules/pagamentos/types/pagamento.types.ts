@@ -6,10 +6,18 @@ export interface Pagamento {
   tipo_label: string
   metodo_pagamento: string
   metodo_pagamento_label: string
+  status: string
+  status_label: string
   data_pagamento: string
   observacoes: string | null
   created_at: string
 }
+
+export const PAGAMENTO_STATUS = [
+  { value: 'pendente', label: 'Pendente' },
+  { value: 'pago', label: 'Pago' },
+  { value: 'cancelado', label: 'Cancelado' },
+]
 
 export const PAGAMENTO_TIPOS = [
   { value: 'diaria', label: 'Diária' },

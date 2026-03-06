@@ -1,128 +1,125 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { UserGroupIcon } from '@heroicons/vue/24/outline'
 import AppButton from '@/components/ui/AppButton.vue'
 import AppModal from '@/components/ui/AppModal.vue'
+import AppSelect from '@/components/ui/AppSelect.vue'
 import { usePagination } from '@/composables/usePagination'
-import { useClientesStore } from '@/stores/clientes.store'
+import { useMultasStore } from '@/stores/multas.store'
 import { useUiStore } from '@/stores/ui.store'
+import { formatDate } from '@/lib/date'
+import { MULTA_STATUS_OPCOES } from '@/modules/multas/types/multa.types'
+import type { Multa } from '@/modules/multas/types/multa.types'
 
 const router = useRouter()
-const clientesStore = useClientesStore()
+const multasStore = useMultasStore()
 const uiStore = useUiStore()
 const { meta, hasPages, hasPrevious, hasNext, setMeta, goToPage } = usePagination()
 
+const statusFilter = ref('')
 const deleteModalOpen = ref(false)
-const clienteToDelete = ref<{ id: number; nome: string } | null>(null)
+const multaToDelete = ref<Multa | null>(null)
 
-async function loadClientes(page = 1) {
-  await clientesStore.fetchClientes(page)
-  setMeta(clientesStore.meta)
+async function loadMultas(page = 1) {
+  await multasStore.fetchItems(page, statusFilter.value ? { status: statusFilter.value } : undefined)
+  setMeta(multasStore.meta)
 }
 
-function openDeleteModal(cliente: { id: number; nome: string }) {
-  clienteToDelete.value = cliente
+function openDeleteModal(multa: Multa) {
+  multaToDelete.value = multa
   deleteModalOpen.value = true
 }
 
 function closeDeleteModal() {
   deleteModalOpen.value = false
-  clienteToDelete.value = null
+  multaToDelete.value = null
 }
 
 async function confirmDelete() {
-  if (!clienteToDelete.value) return
+  if (!multaToDelete.value) return
   try {
-    await clientesStore.deleteCliente(clienteToDelete.value.id)
-    uiStore.notify('success', 'Cliente excluído com sucesso.')
+    await multasStore.deleteItem(multaToDelete.value.id)
+    uiStore.notify('success', 'Multa excluída com sucesso.')
     closeDeleteModal()
-    await loadClientes(meta.value.current_page)
+    await loadMultas(meta.value.current_page)
   } catch {
-    uiStore.notify('error', 'Erro ao excluir cliente.')
+    uiStore.notify('error', 'Erro ao excluir multa.')
   }
 }
 
 function goPrev() {
   const page = goToPage(meta.value.current_page - 1)
-  loadClientes(page)
+  loadMultas(page)
 }
 
 function goNext() {
   const page = goToPage(meta.value.current_page + 1)
-  loadClientes(page)
+  loadMultas(page)
 }
 
-onMounted(() => loadClientes(1))
+function formatCurrency(valor: number) {
+  return valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
+}
+
+function onFilterChange() {
+  loadMultas(1)
+}
+
+onMounted(() => loadMultas(1))
 </script>
 
 <template>
   <div>
     <div class="mb-6 flex items-center justify-between">
       <div>
-        <h1 class="text-2xl font-bold text-surface-900">Clientes</h1>
-        <p class="mt-1 text-sm text-surface-500">Gerencie seus clientes cadastrados</p>
+        <h1 class="text-2xl font-bold text-surface-900">Multas</h1>
+        <p class="mt-1 text-sm text-surface-500">Controle de multas de trânsito</p>
       </div>
-      <AppButton @click="router.push({ name: 'clientes.create' })"> Novo Cliente </AppButton>
+      <AppButton @click="router.push({ name: 'multas.create' })"> Nova Multa </AppButton>
+    </div>
+
+    <div class="mb-4 flex gap-4">
+      <div class="w-48">
+        <AppSelect
+          v-model="statusFilter"
+          label="Status"
+          placeholder="Todos"
+          :options="[{ value: '', label: 'Todos' }, ...MULTA_STATUS_OPCOES]"
+          @update:model-value="onFilterChange"
+        />
+      </div>
     </div>
 
     <div class="rounded-2xl border border-surface-200 bg-white shadow-sm">
-      <div v-if="clientesStore.loading" class="flex justify-center p-8">
-        <svg
-          class="h-8 w-8 animate-spin text-primary-500"
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-        >
-          <circle
-            class="opacity-25"
-            cx="12"
-            cy="12"
-            r="10"
-            stroke="currentColor"
-            stroke-width="4"
-          />
-          <path
-            class="opacity-75"
-            fill="currentColor"
-            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-          />
-        </svg>
+      <div v-if="multasStore.loading" class="p-8 text-center text-surface-500">Carregando...</div>
+
+      <div v-else-if="multasStore.items.length === 0" class="p-8 text-center text-surface-500">
+        Nenhuma multa cadastrada.
       </div>
 
-      <div v-else-if="clientesStore.clientes.length === 0" class="p-8 text-center">
-        <UserGroupIcon class="mx-auto h-12 w-12 text-surface-400" />
-        <p class="mt-2 text-surface-500">Nenhum cliente cadastrado.</p>
-      </div>
-
-      <div v-else class="min-w-full overflow-x-auto">
+      <div v-else class="min-w-full divide-y divide-surface-200 overflow-x-auto">
         <table class="min-w-full divide-y divide-surface-200">
           <thead class="bg-surface-50/80">
             <tr>
               <th
                 class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-surface-500"
               >
-                Nome
+                Locação
               </th>
               <th
                 class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-surface-500"
               >
-                CPF
+                Descrição
               </th>
               <th
                 class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-surface-500"
               >
-                Email
+                Valor
               </th>
               <th
                 class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-surface-500"
               >
-                Telefone
-              </th>
-              <th
-                class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-surface-500"
-              >
-                Cidade/UF
+                Data Infração
               </th>
               <th
                 class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-surface-500"
@@ -138,27 +135,40 @@ onMounted(() => loadClientes(1))
           </thead>
           <tbody class="divide-y divide-surface-200 bg-white">
             <tr
-              v-for="cliente in clientesStore.clientes"
-              :key="cliente.id"
+              v-for="multa in multasStore.items"
+              :key="multa.id"
               class="transition-colors hover:bg-surface-50"
             >
               <td class="whitespace-nowrap px-6 py-4 text-sm text-surface-900">
-                {{ cliente.nome }}
+                #{{ multa.locacao_id }}
+              </td>
+              <td class="max-w-xs truncate px-6 py-4 text-sm text-surface-900" :title="multa.descricao">
+                {{ multa.descricao }}
+              </td>
+              <td class="whitespace-nowrap px-6 py-4 text-sm text-surface-900">
+                {{ formatCurrency(multa.valor) }}
               </td>
               <td class="whitespace-nowrap px-6 py-4 text-sm text-surface-500">
-                {{ cliente.cpf }}
+                {{ formatDate(multa.data_infracao) }}
               </td>
-              <td class="whitespace-nowrap px-6 py-4 text-sm text-surface-500">
-                {{ cliente.email || '—' }}
-              </td>
-              <td class="whitespace-nowrap px-6 py-4 text-sm text-surface-500">
-                {{ cliente.telefone || '—' }}
+              <td class="whitespace-nowrap px-6 py-4">
+                <span
+                  :class="[
+                    'inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium',
+                    multa.status === 'paga' ? 'bg-green-100 text-green-800' : '',
+                    multa.status === 'pendente' ? 'bg-amber-100 text-amber-800' : '',
+                    multa.status === 'contestada' ? 'bg-blue-100 text-blue-800' : '',
+                    multa.status === 'cancelada' ? 'bg-red-100 text-red-800' : '',
+                  ]"
+                >
+                  {{ multa.status_label }}
+                </span>
               </td>
               <td class="whitespace-nowrap px-6 py-4 text-right text-sm">
                 <AppButton
                   variant="ghost"
                   size="sm"
-                  @click="router.push({ name: 'clientes.edit', params: { id: cliente.id } })"
+                  @click="router.push({ name: 'multas.edit', params: { id: multa.id } })"
                 >
                   Editar
                 </AppButton>
@@ -166,7 +176,7 @@ onMounted(() => loadClientes(1))
                   variant="danger"
                   size="sm"
                   class="ml-2"
-                  @click="openDeleteModal({ id: cliente.id, nome: cliente.nome })"
+                  @click="openDeleteModal(multa)"
                 >
                   Excluir
                 </AppButton>
@@ -180,7 +190,7 @@ onMounted(() => loadClientes(1))
         v-if="hasPages"
         class="flex items-center justify-between border-t border-surface-200 px-6 py-3"
       >
-        <p class="text-sm text-surface-500">
+        <p class="text-sm text-surface-600">
           Página {{ meta.current_page }} de {{ meta.last_page }} ({{ meta.total }} registros)
         </p>
         <div class="flex gap-2">
@@ -196,13 +206,13 @@ onMounted(() => loadClientes(1))
 
     <AppModal
       :open="deleteModalOpen"
-      title="Excluir cliente"
+      title="Excluir multa"
       max-width="sm"
       @close="closeDeleteModal"
     >
-      <p v-if="clienteToDelete" class="text-surface-600">
-        Tem certeza que deseja excluir o cliente <strong>{{ clienteToDelete.nome }}</strong
-        >?
+      <p v-if="multaToDelete" class="text-surface-600">
+        Tem certeza que deseja excluir a multa de
+        <strong>{{ formatCurrency(multaToDelete.valor) }}</strong> ({{ multaToDelete.descricao }})?
       </p>
       <div class="mt-6 flex justify-end gap-2">
         <AppButton variant="secondary" @click="closeDeleteModal">Cancelar</AppButton>

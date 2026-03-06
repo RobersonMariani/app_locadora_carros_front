@@ -22,6 +22,28 @@ const COR_OPCOES = [
   { value: 'Cinza', label: 'Cinza' },
   { value: 'Outro', label: 'Outro' },
 ]
+const COMBUSTIVEL_OPCOES = [
+  { value: 'flex', label: 'Flex' },
+  { value: 'gasolina', label: 'Gasolina' },
+  { value: 'etanol', label: 'Etanol' },
+  { value: 'diesel', label: 'Diesel' },
+  { value: 'eletrico', label: 'Elétrico' },
+  { value: 'hibrido', label: 'Híbrido' },
+]
+const CAMBIO_OPCOES = [
+  { value: 'manual', label: 'Manual' },
+  { value: 'automatico', label: 'Automático' },
+  { value: 'cvt', label: 'CVT' },
+]
+const CATEGORIA_OPCOES = [
+  { value: 'economico', label: 'Econômico' },
+  { value: 'compacto', label: 'Compacto' },
+  { value: 'sedan', label: 'Sedan' },
+  { value: 'suv', label: 'SUV' },
+  { value: 'pickup', label: 'Pickup' },
+  { value: 'luxo', label: 'Luxo' },
+  { value: 'van', label: 'Van' },
+]
 
 const { data, errors, processing, submit } = useForm({
   modelo_id: '' as string | number,
@@ -32,6 +54,11 @@ const { data, errors, processing, submit } = useForm({
   renavam: '',
   disponivel: true,
   km: '' as string | number,
+  combustivel: '',
+  cambio: '',
+  categoria: '',
+  ar_condicionado: false,
+  diaria_padrao: '' as string | number,
 })
 
 const modeloOptions = ref<{ value: number; label: string }[]>([])
@@ -55,6 +82,7 @@ async function handleSubmit() {
   const km = data.value.km !== '' ? Number(data.value.km) : 0
   const anoFab = data.value.ano_fabricacao !== '' ? Number(data.value.ano_fabricacao) : 0
   const anoMod = data.value.ano_modelo !== '' ? Number(data.value.ano_modelo) : 0
+  const diariaPadrao = data.value.diaria_padrao !== '' ? Number(data.value.diaria_padrao) : undefined
   const parsed = createCarroSchema.safeParse({
     modelo_id: modeloId,
     placa: data.value.placa,
@@ -64,6 +92,11 @@ async function handleSubmit() {
     renavam: data.value.renavam || undefined,
     disponivel: data.value.disponivel,
     km,
+    combustivel: data.value.combustivel || undefined,
+    cambio: data.value.cambio || undefined,
+    categoria: data.value.categoria || undefined,
+    ar_condicionado: data.value.ar_condicionado,
+    diaria_padrao: diariaPadrao ?? null,
   })
 
   if (!parsed.success) {
@@ -80,6 +113,7 @@ async function handleSubmit() {
     await carroService.create({
       ...parsed.data,
       renavam: parsed.data.renavam ?? null,
+      diaria_padrao: parsed.data.diaria_padrao ?? null,
     })
     uiStore.notify('success', 'Carro criado com sucesso.')
     router.push({ name: 'carros' })
@@ -161,14 +195,60 @@ async function handleSubmit() {
             :error="errors.km"
           />
 
-          <div class="flex items-center gap-2">
-            <input
-              v-model="data.disponivel"
-              type="checkbox"
-              id="disponivel"
-              class="rounded border-surface-300 text-primary-600 focus:ring-primary-500"
-            />
-            <label for="disponivel" class="text-sm font-medium text-surface-700">Disponível</label>
+          <AppSelect
+            v-model="data.combustivel"
+            label="Combustível"
+            placeholder="Selecione o combustível"
+            :options="COMBUSTIVEL_OPCOES"
+            :error="errors.combustivel"
+          />
+
+          <AppSelect
+            v-model="data.cambio"
+            label="Câmbio"
+            placeholder="Selecione o câmbio"
+            :options="CAMBIO_OPCOES"
+            :error="errors.cambio"
+          />
+
+          <AppSelect
+            v-model="data.categoria"
+            label="Categoria"
+            placeholder="Selecione a categoria"
+            :options="CATEGORIA_OPCOES"
+            :error="errors.categoria"
+          />
+
+          <AppInput
+            v-model="data.diaria_padrao"
+            type="number"
+            label="Diária Padrão (R$)"
+            placeholder="0,00"
+            step="0.01"
+            :error="errors.diaria_padrao"
+          />
+
+          <div class="flex flex-col gap-2">
+            <div class="flex items-center gap-2">
+              <input
+                v-model="data.disponivel"
+                type="checkbox"
+                id="disponivel"
+                class="rounded border-surface-300 text-primary-600 focus:ring-primary-500"
+              />
+              <label for="disponivel" class="text-sm font-medium text-surface-700">Disponível</label>
+            </div>
+            <div class="flex items-center gap-2">
+              <input
+                v-model="data.ar_condicionado"
+                type="checkbox"
+                id="ar_condicionado"
+                class="rounded border-surface-300 text-primary-600 focus:ring-primary-500"
+              />
+              <label for="ar_condicionado" class="text-sm font-medium text-surface-700"
+                >Ar Condicionado</label
+              >
+            </div>
           </div>
         </div>
 

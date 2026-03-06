@@ -5,10 +5,41 @@ import z from 'zod'
 import { ChevronRightIcon } from '@heroicons/vue/24/outline'
 import AppButton from '@/components/ui/AppButton.vue'
 import AppInput from '@/components/ui/AppInput.vue'
+import AppSelect from '@/components/ui/AppSelect.vue'
 import { useForm } from '@/composables/useForm'
 import { clienteService } from '@/modules/clientes/services/cliente.service'
 import { updateClienteSchema } from '@/modules/clientes/dtos/cliente.dto'
 import { useUiStore } from '@/stores/ui.store'
+
+const UF_OPCOES = [
+  { value: 'AC', label: 'AC' },
+  { value: 'AL', label: 'AL' },
+  { value: 'AP', label: 'AP' },
+  { value: 'AM', label: 'AM' },
+  { value: 'BA', label: 'BA' },
+  { value: 'CE', label: 'CE' },
+  { value: 'DF', label: 'DF' },
+  { value: 'ES', label: 'ES' },
+  { value: 'GO', label: 'GO' },
+  { value: 'MA', label: 'MA' },
+  { value: 'MG', label: 'MG' },
+  { value: 'MS', label: 'MS' },
+  { value: 'MT', label: 'MT' },
+  { value: 'PA', label: 'PA' },
+  { value: 'PB', label: 'PB' },
+  { value: 'PE', label: 'PE' },
+  { value: 'PI', label: 'PI' },
+  { value: 'PR', label: 'PR' },
+  { value: 'RJ', label: 'RJ' },
+  { value: 'RN', label: 'RN' },
+  { value: 'RS', label: 'RS' },
+  { value: 'RO', label: 'RO' },
+  { value: 'RR', label: 'RR' },
+  { value: 'SC', label: 'SC' },
+  { value: 'SP', label: 'SP' },
+  { value: 'SE', label: 'SE' },
+  { value: 'TO', label: 'TO' },
+]
 
 const route = useRoute()
 const router = useRouter()
@@ -20,6 +51,12 @@ const { data, errors, processing, submit, reset } = useForm({
   telefone: '',
   data_nascimento: '',
   cnh: '',
+  endereco: '',
+  cidade: '',
+  estado: '',
+  cep: '',
+  bloqueado: false,
+  motivo_bloqueio: '',
 })
 
 const id = computed(() => Number(route.params.id))
@@ -33,6 +70,12 @@ async function loadCliente() {
   data.value.telefone = cliente.telefone ?? ''
   data.value.data_nascimento = cliente.data_nascimento ?? ''
   data.value.cnh = cliente.cnh ?? ''
+  data.value.endereco = cliente.endereco ?? ''
+  data.value.cidade = cliente.cidade ?? ''
+  data.value.estado = cliente.estado ?? ''
+  data.value.cep = cliente.cep ?? ''
+  data.value.bloqueado = cliente.bloqueado ?? false
+  data.value.motivo_bloqueio = cliente.motivo_bloqueio ?? ''
 }
 
 async function handleSubmit() {
@@ -54,6 +97,11 @@ async function handleSubmit() {
       telefone: formData.telefone || undefined,
       data_nascimento: formData.data_nascimento || undefined,
       cnh: formData.cnh || undefined,
+      endereco: formData.endereco || undefined,
+      cidade: formData.cidade || undefined,
+      estado: formData.estado || undefined,
+      cep: formData.cep || undefined,
+      motivo_bloqueio: formData.bloqueado ? (formData.motivo_bloqueio || undefined) : undefined,
     }
     await clienteService.update(id.value, payload)
     uiStore.notify('success', 'Cliente atualizado com sucesso.')
@@ -113,6 +161,51 @@ onMounted(loadCliente)
           placeholder="Número da CNH"
           :error="errors.cnh"
         />
+        <AppInput
+          v-model="data.endereco"
+          label="Endereço"
+          placeholder="Rua, número, complemento"
+          :error="errors.endereco"
+        />
+        <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <AppInput
+            v-model="data.cidade"
+            label="Cidade"
+            placeholder="Cidade"
+            :error="errors.cidade"
+          />
+          <AppSelect
+            v-model="data.estado"
+            label="Estado"
+            placeholder="UF"
+            :options="UF_OPCOES"
+            :error="errors.estado"
+          />
+        </div>
+        <AppInput
+          v-model="data.cep"
+          label="CEP"
+          placeholder="00000-000"
+          :error="errors.cep"
+        />
+        <div class="flex flex-col gap-2">
+          <div class="flex items-center gap-2">
+            <input
+              v-model="data.bloqueado"
+              type="checkbox"
+              id="bloqueado"
+              class="rounded border-surface-300 text-primary-600 focus:ring-primary-500"
+            />
+            <label for="bloqueado" class="text-sm font-medium text-surface-700">Bloqueado</label>
+          </div>
+          <AppInput
+            v-if="data.bloqueado"
+            v-model="data.motivo_bloqueio"
+            label="Motivo do Bloqueio"
+            placeholder="Informe o motivo do bloqueio"
+            :error="errors.motivo_bloqueio"
+          />
+        </div>
 
         <div class="flex gap-2 pt-4">
           <AppButton type="submit" :loading="processing"> Salvar </AppButton>

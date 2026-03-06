@@ -12,6 +12,11 @@ export const createCarroSchema = z.object({
     .transform((s) => (!s || s === '' ? null : s)),
   disponivel: z.boolean(),
   km: z.coerce.number().int('KM deve ser um número inteiro').min(0, 'KM é obrigatório'),
+  combustivel: z.string().optional(),
+  cambio: z.string().optional(),
+  categoria: z.string().optional(),
+  ar_condicionado: z.boolean().optional(),
+  diaria_padrao: z.number().min(0).optional().nullable(),
 })
 
 export type CreateCarroDto = z.infer<typeof createCarroSchema>
@@ -21,6 +26,11 @@ export const updateCarroSchema = z.object({
   placa: z.string().min(1).max(10).optional(),
   disponivel: z.boolean().optional(),
   km: z.number().int().optional(),
+  combustivel: z.string().optional(),
+  cambio: z.string().optional(),
+  categoria: z.string().optional(),
+  ar_condicionado: z.boolean().optional(),
+  diaria_padrao: z.number().min(0).optional().nullable(),
 })
 
 export type UpdateCarroDto = z.infer<typeof updateCarroSchema>

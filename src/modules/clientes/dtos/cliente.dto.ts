@@ -7,6 +7,10 @@ export const createClienteSchema = z.object({
   telefone: z.string().max(20, 'Telefone deve ter no máximo 20 caracteres').optional().or(z.literal('')),
   data_nascimento: z.string().optional().or(z.literal('')),
   cnh: z.string().max(20, 'CNH deve ter no máximo 20 caracteres').optional().or(z.literal('')),
+  endereco: z.string().max(255).optional().or(z.literal('')),
+  cidade: z.string().max(100).optional().or(z.literal('')),
+  estado: z.string().regex(/^[A-Z]{2}$/, 'Estado deve ser sigla de 2 letras (ex: SP)').optional().or(z.literal('')),
+  cep: z.string().regex(/^\d{5}-\d{3}$/, 'CEP deve estar no formato 00000-000').optional().or(z.literal('')),
 })
 
 export const updateClienteSchema = z.object({
@@ -16,6 +20,12 @@ export const updateClienteSchema = z.object({
   telefone: z.string().max(20, 'Telefone deve ter no máximo 20 caracteres').optional().or(z.literal('')),
   data_nascimento: z.string().optional().or(z.literal('')),
   cnh: z.string().max(20, 'CNH deve ter no máximo 20 caracteres').optional().or(z.literal('')),
+  endereco: z.string().max(255).optional().or(z.literal('')),
+  cidade: z.string().max(100).optional().or(z.literal('')),
+  estado: z.string().regex(/^[A-Z]{2}$/, 'Estado deve ser sigla de 2 letras (ex: SP)').optional().or(z.literal('')),
+  cep: z.string().regex(/^\d{5}-\d{3}$/, 'CEP deve estar no formato 00000-000').optional().or(z.literal('')),
+  bloqueado: z.boolean().optional(),
+  motivo_bloqueio: z.string().max(255).optional().or(z.literal('')),
 })
 
 export type CreateClienteDto = z.infer<typeof createClienteSchema>

@@ -4,6 +4,7 @@ export interface Locacao {
   id: number
   status: string
   status_label: string
+  atrasada: boolean
   valor_total: number | null
   observacoes: string | null
   cliente_id: number

@@ -9,7 +9,11 @@ import AppSelect from '@/components/ui/AppSelect.vue'
 import { useForm } from '@/composables/useForm'
 import { pagamentoService } from '@/modules/pagamentos/services/pagamento.service'
 import { updatePagamentoSchema } from '@/modules/pagamentos/dtos/pagamento.dto'
-import { PAGAMENTO_TIPOS, METODOS_PAGAMENTO } from '@/modules/pagamentos/types/pagamento.types'
+import {
+  PAGAMENTO_TIPOS,
+  METODOS_PAGAMENTO,
+  PAGAMENTO_STATUS,
+} from '@/modules/pagamentos/types/pagamento.types'
 import { useUiStore } from '@/stores/ui.store'
 
 const route = useRoute()
@@ -20,6 +24,7 @@ const { data, errors, processing, submit, reset } = useForm({
   valor: '' as string | number,
   tipo: '',
   metodo_pagamento: '',
+  status: '',
   data_pagamento: '',
   observacoes: '',
 })
@@ -33,6 +38,7 @@ async function loadPagamento() {
   data.value.valor = pagamento.valor
   data.value.tipo = pagamento.tipo
   data.value.metodo_pagamento = pagamento.metodo_pagamento
+  data.value.status = pagamento.status ?? ''
   data.value.data_pagamento = pagamento.data_pagamento.split('T')[0] ?? pagamento.data_pagamento
   data.value.observacoes = pagamento.observacoes ?? ''
 }
@@ -55,6 +61,7 @@ async function handleSubmit() {
       valor: Number(formData.valor),
       tipo: formData.tipo,
       metodo_pagamento: formData.metodo_pagamento,
+      status: formData.status || undefined,
       data_pagamento: formData.data_pagamento,
       observacoes: formData.observacoes || undefined,
     }
@@ -109,6 +116,13 @@ onMounted(loadPagamento)
           placeholder="Selecione o método"
           required
           :error="errors.metodo_pagamento"
+        />
+        <AppSelect
+          v-model="data.status"
+          label="Status"
+          :options="PAGAMENTO_STATUS"
+          placeholder="Selecione o status"
+          :error="errors.status"
         />
         <AppInput
           v-model="data.data_pagamento"

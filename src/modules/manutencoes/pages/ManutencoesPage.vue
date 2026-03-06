@@ -3,78 +3,116 @@ import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import AppButton from '@/components/ui/AppButton.vue'
 import AppModal from '@/components/ui/AppModal.vue'
+import AppSelect from '@/components/ui/AppSelect.vue'
 import { usePagination } from '@/composables/usePagination'
-import { useCarrosStore } from '@/stores/carros.store'
+import { useManutencoesStore } from '@/stores/manutencoes.store'
 import { useUiStore } from '@/stores/ui.store'
-import type { Carro } from '@/modules/carros/types/carro.types'
+import { formatDate } from '@/lib/date'
+import {
+  MANUTENCAO_TIPO_OPCOES,
+  MANUTENCAO_STATUS_OPCOES,
+} from '@/modules/manutencoes/types/manutencao.types'
+import type { Manutencao } from '@/modules/manutencoes/types/manutencao.types'
 
 const router = useRouter()
-const carrosStore = useCarrosStore()
+const manutencoesStore = useManutencoesStore()
 const uiStore = useUiStore()
 const { meta, hasPages, hasPrevious, hasNext, setMeta, goToPage } = usePagination()
 
+const tipoFilter = ref('')
+const statusFilter = ref('')
 const deleteModalOpen = ref(false)
-const carroToDelete = ref<{ id: number; placa: string } | null>(null)
+const manutencaoToDelete = ref<Manutencao | null>(null)
 
-async function loadCarros(page = 1) {
-  await carrosStore.fetchCarros(page)
-  setMeta(carrosStore.pagination)
+async function loadManutencoes(page = 1) {
+  const params: { tipo?: string; status?: string } = {}
+  if (tipoFilter.value) params.tipo = tipoFilter.value
+  if (statusFilter.value) params.status = statusFilter.value
+  await manutencoesStore.fetchItems(page, params)
+  setMeta(manutencoesStore.meta)
 }
 
-function openDeleteModal(carro: { id: number; placa: string }) {
-  carroToDelete.value = carro
+function openDeleteModal(manutencao: Manutencao) {
+  manutencaoToDelete.value = manutencao
   deleteModalOpen.value = true
 }
 
 function closeDeleteModal() {
   deleteModalOpen.value = false
-  carroToDelete.value = null
+  manutencaoToDelete.value = null
 }
 
 async function confirmDelete() {
-  if (!carroToDelete.value) return
+  if (!manutencaoToDelete.value) return
   try {
-    await carrosStore.deleteCarro(carroToDelete.value.id)
-    uiStore.notify('success', 'Carro excluído com sucesso.')
+    await manutencoesStore.deleteItem(manutencaoToDelete.value.id)
+    uiStore.notify('success', 'Manutenção excluída com sucesso.')
     closeDeleteModal()
-    await loadCarros(meta.value.current_page)
+    await loadManutencoes(meta.value.current_page)
   } catch {
-    uiStore.notify('error', 'Erro ao excluir carro.')
+    uiStore.notify('error', 'Erro ao excluir manutenção.')
   }
 }
 
 function goPrev() {
   const page = goToPage(meta.value.current_page - 1)
-  loadCarros(page)
+  loadManutencoes(page)
 }
 
 function goNext() {
   const page = goToPage(meta.value.current_page + 1)
-  loadCarros(page)
+  loadManutencoes(page)
 }
 
-function modeloNome(carro: Carro): string {
-  return carro.modelo?.nome ?? '-'
+function formatCurrency(valor: number) {
+  return valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
 }
 
-onMounted(() => loadCarros(1))
+function onFilterChange() {
+  loadManutencoes(1)
+}
+
+onMounted(() => loadManutencoes(1))
 </script>
 
 <template>
   <div>
     <div class="mb-6 flex items-center justify-between">
       <div>
-        <h1 class="text-2xl font-bold text-surface-900">Carros</h1>
-        <p class="mt-1 text-sm text-surface-500">Frota de veículos da locadora</p>
+        <h1 class="text-2xl font-bold text-surface-900">Manutenções</h1>
+        <p class="mt-1 text-sm text-surface-500">Controle de manutenções da frota</p>
       </div>
-      <AppButton @click="router.push({ name: 'carros.create' })"> Novo Carro </AppButton>
+      <AppButton @click="router.push({ name: 'manutencoes.create' })">
+        Nova Manutenção
+      </AppButton>
+    </div>
+
+    <div class="mb-4 flex gap-4">
+      <div class="w-48">
+        <AppSelect
+          v-model="tipoFilter"
+          label="Tipo"
+          placeholder="Todos"
+          :options="[{ value: '', label: 'Todos' }, ...MANUTENCAO_TIPO_OPCOES]"
+          @update:model-value="onFilterChange"
+        />
+      </div>
+      <div class="w-48">
+        <AppSelect
+          v-model="statusFilter"
+          label="Status"
+          placeholder="Todos"
+          :options="[{ value: '', label: 'Todos' }, ...MANUTENCAO_STATUS_OPCOES]"
+          @update:model-value="onFilterChange"
+        />
+      </div>
     </div>
 
     <div class="rounded-2xl border border-surface-200 bg-white shadow-sm">
-      <div v-if="carrosStore.loading" class="p-8 text-center text-surface-500">Carregando...</div>
+      <div v-if="manutencoesStore.loading" class="p-8 text-center text-surface-500">Carregando...</div>
 
-      <div v-else-if="carrosStore.carros.length === 0" class="p-8 text-center text-surface-500">
-        Nenhum carro cadastrado.
+      <div v-else-if="manutencoesStore.items.length === 0" class="p-8 text-center text-surface-500">
+        Nenhuma manutenção cadastrada.
       </div>
 
       <div v-else class="min-w-full divide-y divide-surface-200 overflow-x-auto">
@@ -84,52 +122,32 @@ onMounted(() => loadCarros(1))
               <th
                 class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-surface-500"
               >
-                Placa
+                Carro
               </th>
               <th
                 class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-surface-500"
               >
-                Modelo
+                Tipo
               </th>
               <th
                 class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-surface-500"
               >
-                Cor
+                Descrição
               </th>
               <th
                 class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-surface-500"
               >
-                Ano Fab/Mod
+                Valor
               </th>
               <th
                 class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-surface-500"
               >
-                Categoria
+                Data
               </th>
               <th
                 class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-surface-500"
               >
-                Combustível
-              </th>
-              <th
-                class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-surface-500"
-              >
-                Câmbio
-              </th>
-              <th
-                class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-surface-500"
-              >
-                KM
-              </th>
-              <th
-                class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-surface-500"
-              >
-                Diária Padrão
-              </th>
-              <th
-                class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-surface-500"
-              >
-                Disponível
+                Status
               </th>
               <th
                 class="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-surface-500"
@@ -140,59 +158,43 @@ onMounted(() => loadCarros(1))
           </thead>
           <tbody class="divide-y divide-surface-200 bg-white">
             <tr
-              v-for="carro in carrosStore.carros"
-              :key="carro.id"
+              v-for="manutencao in manutencoesStore.items"
+              :key="manutencao.id"
               class="transition-colors hover:bg-surface-50"
             >
-              <td class="whitespace-nowrap px-6 py-4 text-sm font-medium text-surface-900">
-                {{ carro.placa }}
+              <td class="whitespace-nowrap px-6 py-4 text-sm text-surface-900">
+                #{{ manutencao.carro_id }}
+              </td>
+              <td class="whitespace-nowrap px-6 py-4 text-sm text-surface-500">
+                {{ manutencao.tipo_label }}
+              </td>
+              <td class="max-w-xs truncate px-6 py-4 text-sm text-surface-900" :title="manutencao.descricao">
+                {{ manutencao.descricao }}
               </td>
               <td class="whitespace-nowrap px-6 py-4 text-sm text-surface-900">
-                {{ modeloNome(carro) }}
+                {{ formatCurrency(manutencao.valor) }}
               </td>
-              <td class="whitespace-nowrap px-6 py-4 text-sm text-surface-900">
-                {{ carro.cor }}
-              </td>
-              <td class="whitespace-nowrap px-6 py-4 text-sm text-surface-900">
-                {{ carro.ano_fabricacao }}/{{ carro.ano_modelo }}
-              </td>
-              <td class="whitespace-nowrap px-6 py-4 text-sm text-surface-900">
-                {{ carro.categoria_label ?? carro.categoria ?? '-' }}
-              </td>
-              <td class="whitespace-nowrap px-6 py-4 text-sm text-surface-900">
-                {{ carro.combustivel_label ?? carro.combustivel ?? '-' }}
-              </td>
-              <td class="whitespace-nowrap px-6 py-4 text-sm text-surface-900">
-                {{ carro.cambio_label ?? carro.cambio ?? '-' }}
-              </td>
-              <td class="whitespace-nowrap px-6 py-4 text-sm text-surface-900">
-                {{ carro.km.toLocaleString('pt-BR') }}
-              </td>
-              <td class="whitespace-nowrap px-6 py-4 text-sm text-surface-900">
-                {{
-                  carro.diaria_padrao != null
-                    ? carro.diaria_padrao.toLocaleString('pt-BR', {
-                        style: 'currency',
-                        currency: 'BRL',
-                      })
-                    : '-'
-                }}
+              <td class="whitespace-nowrap px-6 py-4 text-sm text-surface-500">
+                {{ formatDate(manutencao.data_manutencao) }}
               </td>
               <td class="whitespace-nowrap px-6 py-4">
                 <span
                   :class="[
                     'inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium',
-                    carro.disponivel ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800',
+                    manutencao.status === 'concluida' ? 'bg-green-100 text-green-800' : '',
+                    manutencao.status === 'agendada' ? 'bg-amber-100 text-amber-800' : '',
+                    manutencao.status === 'em_andamento' ? 'bg-blue-100 text-blue-800' : '',
+                    manutencao.status === 'cancelada' ? 'bg-red-100 text-red-800' : '',
                   ]"
                 >
-                  {{ carro.disponivel ? 'Disponível' : 'Indisponível' }}
+                  {{ manutencao.status_label }}
                 </span>
               </td>
               <td class="whitespace-nowrap px-6 py-4 text-right text-sm">
                 <AppButton
                   variant="ghost"
                   size="sm"
-                  @click="router.push({ name: 'carros.edit', params: { id: carro.id } })"
+                  @click="router.push({ name: 'manutencoes.edit', params: { id: manutencao.id } })"
                 >
                   Editar
                 </AppButton>
@@ -200,7 +202,7 @@ onMounted(() => loadCarros(1))
                   variant="danger"
                   size="sm"
                   class="ml-2"
-                  @click="openDeleteModal({ id: carro.id, placa: carro.placa })"
+                  @click="openDeleteModal(manutencao)"
                 >
                   Excluir
                 </AppButton>
@@ -230,13 +232,13 @@ onMounted(() => loadCarros(1))
 
     <AppModal
       :open="deleteModalOpen"
-      title="Excluir carro"
+      title="Excluir manutenção"
       max-width="sm"
       @close="closeDeleteModal"
     >
-      <p v-if="carroToDelete" class="text-surface-600">
-        Tem certeza que deseja excluir o carro de placa <strong>{{ carroToDelete.placa }}</strong
-        >?
+      <p v-if="manutencaoToDelete" class="text-surface-600">
+        Tem certeza que deseja excluir a manutenção
+        <strong>{{ manutencaoToDelete.descricao }}</strong>?
       </p>
       <div class="mt-6 flex justify-end gap-2">
         <AppButton variant="secondary" @click="closeDeleteModal">Cancelar</AppButton>

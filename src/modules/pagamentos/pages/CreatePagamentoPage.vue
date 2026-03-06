@@ -8,7 +8,11 @@ import AppSelect from '@/components/ui/AppSelect.vue'
 import { useForm } from '@/composables/useForm'
 import { pagamentoService } from '@/modules/pagamentos/services/pagamento.service'
 import { createPagamentoSchema } from '@/modules/pagamentos/dtos/pagamento.dto'
-import { PAGAMENTO_TIPOS, METODOS_PAGAMENTO } from '@/modules/pagamentos/types/pagamento.types'
+import {
+  PAGAMENTO_TIPOS,
+  METODOS_PAGAMENTO,
+  PAGAMENTO_STATUS,
+} from '@/modules/pagamentos/types/pagamento.types'
 import { useUiStore } from '@/stores/ui.store'
 
 const router = useRouter()
@@ -18,6 +22,7 @@ const { data, errors, processing, submit } = useForm({
   valor: '' as string | number,
   tipo: '',
   metodo_pagamento: '',
+  status: '',
   data_pagamento: '',
   observacoes: '',
 })
@@ -40,6 +45,7 @@ async function handleSubmit() {
       valor: Number(formData.valor),
       tipo: formData.tipo,
       metodo_pagamento: formData.metodo_pagamento,
+      status: formData.status || undefined,
       data_pagamento: formData.data_pagamento,
       observacoes: formData.observacoes || undefined,
     }
@@ -92,6 +98,13 @@ async function handleSubmit() {
           placeholder="Selecione o método"
           required
           :error="errors.metodo_pagamento"
+        />
+        <AppSelect
+          v-model="data.status"
+          label="Status"
+          :options="PAGAMENTO_STATUS"
+          placeholder="Selecione o status"
+          :error="errors.status"
         />
         <AppInput
           v-model="data.data_pagamento"

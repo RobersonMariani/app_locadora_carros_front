@@ -4,10 +4,41 @@ import z from 'zod'
 import { ChevronRightIcon } from '@heroicons/vue/24/outline'
 import AppButton from '@/components/ui/AppButton.vue'
 import AppInput from '@/components/ui/AppInput.vue'
+import AppSelect from '@/components/ui/AppSelect.vue'
 import { useForm } from '@/composables/useForm'
 import { clienteService } from '@/modules/clientes/services/cliente.service'
 import { createClienteSchema } from '@/modules/clientes/dtos/cliente.dto'
 import { useUiStore } from '@/stores/ui.store'
+
+const UF_OPCOES = [
+  { value: 'AC', label: 'AC' },
+  { value: 'AL', label: 'AL' },
+  { value: 'AP', label: 'AP' },
+  { value: 'AM', label: 'AM' },
+  { value: 'BA', label: 'BA' },
+  { value: 'CE', label: 'CE' },
+  { value: 'DF', label: 'DF' },
+  { value: 'ES', label: 'ES' },
+  { value: 'GO', label: 'GO' },
+  { value: 'MA', label: 'MA' },
+  { value: 'MG', label: 'MG' },
+  { value: 'MS', label: 'MS' },
+  { value: 'MT', label: 'MT' },
+  { value: 'PA', label: 'PA' },
+  { value: 'PB', label: 'PB' },
+  { value: 'PE', label: 'PE' },
+  { value: 'PI', label: 'PI' },
+  { value: 'PR', label: 'PR' },
+  { value: 'RJ', label: 'RJ' },
+  { value: 'RN', label: 'RN' },
+  { value: 'RS', label: 'RS' },
+  { value: 'RO', label: 'RO' },
+  { value: 'RR', label: 'RR' },
+  { value: 'SC', label: 'SC' },
+  { value: 'SP', label: 'SP' },
+  { value: 'SE', label: 'SE' },
+  { value: 'TO', label: 'TO' },
+]
 
 const router = useRouter()
 const uiStore = useUiStore()
@@ -18,6 +49,10 @@ const { data, errors, processing, submit } = useForm({
   telefone: '',
   data_nascimento: '',
   cnh: '',
+  endereco: '',
+  cidade: '',
+  estado: '',
+  cep: '',
 })
 
 async function handleSubmit() {
@@ -39,6 +74,10 @@ async function handleSubmit() {
       telefone: formData.telefone || undefined,
       data_nascimento: formData.data_nascimento || undefined,
       cnh: formData.cnh || undefined,
+      endereco: formData.endereco || undefined,
+      cidade: formData.cidade || undefined,
+      estado: formData.estado || undefined,
+      cep: formData.cep || undefined,
     }
     await clienteService.create(payload)
     uiStore.notify('success', 'Cliente criado com sucesso.')
@@ -95,6 +134,33 @@ async function handleSubmit() {
           label="CNH"
           placeholder="Número da CNH"
           :error="errors.cnh"
+        />
+        <AppInput
+          v-model="data.endereco"
+          label="Endereço"
+          placeholder="Rua, número, complemento"
+          :error="errors.endereco"
+        />
+        <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <AppInput
+            v-model="data.cidade"
+            label="Cidade"
+            placeholder="Cidade"
+            :error="errors.cidade"
+          />
+          <AppSelect
+            v-model="data.estado"
+            label="Estado"
+            placeholder="UF"
+            :options="UF_OPCOES"
+            :error="errors.estado"
+          />
+        </div>
+        <AppInput
+          v-model="data.cep"
+          label="CEP"
+          placeholder="00000-000"
+          :error="errors.cep"
         />
 
         <div class="flex gap-2 pt-4">

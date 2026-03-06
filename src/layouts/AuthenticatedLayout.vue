@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth.store'
 import { useUiStore } from '@/stores/ui.store'
 import ApplicationLogo from '@/components/shared/ApplicationLogo.vue'
+import NotificationBell from '@/components/shared/NotificationBell.vue'
 import NotificationToast from '@/components/ui/NotificationToast.vue'
 import {
   Bars3Icon,
@@ -16,7 +17,9 @@ import {
   ClipboardDocumentListIcon,
   BanknotesIcon,
   ChevronLeftIcon,
-  UserCircleIcon,
+  BellAlertIcon,
+  ExclamationTriangleIcon,
+  WrenchScrewdriverIcon,
 } from '@heroicons/vue/24/outline'
 
 const auth = useAuthStore()
@@ -31,7 +34,10 @@ const navigation = [
   { name: 'Modelos', route: 'modelos', icon: CubeIcon },
   { name: 'Carros', route: 'carros', icon: TruckIcon },
   { name: 'Locações', route: 'locacoes', icon: ClipboardDocumentListIcon },
+  { name: 'Multas', route: 'multas', icon: ExclamationTriangleIcon },
+  { name: 'Manutenções', route: 'manutencoes', icon: WrenchScrewdriverIcon },
   { name: 'Pagamentos', route: 'pagamentos', icon: BanknotesIcon },
+  { name: 'Alertas', route: 'alertas', icon: BellAlertIcon },
 ]
 
 onMounted(async () => {
@@ -141,6 +147,7 @@ function getInitials(name: string | undefined): string {
         </div>
 
         <div class="relative flex items-center gap-3">
+          <NotificationBell />
           <button
             class="flex items-center gap-2 rounded-xl px-3 py-2 transition-colors hover:bg-surface-50"
             @click="userMenuOpen = !userMenuOpen"

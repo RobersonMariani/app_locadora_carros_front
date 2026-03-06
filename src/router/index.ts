@@ -96,6 +96,11 @@ const router = createRouter({
       component: () => import('@/modules/pagamentos/pages/PagamentosPage.vue'),
     },
     {
+      path: '/alertas',
+      name: 'alertas',
+      component: () => import('@/modules/alertas/pages/AlertasPage.vue'),
+    },
+    {
       path: '/pagamentos/criar',
       name: 'pagamentos.create',
       component: () => import('@/modules/pagamentos/pages/CreatePagamentoPage.vue'),

@@ -5,13 +5,13 @@ import AppButton from '@/components/ui/AppButton.vue'
 import AppModal from '@/components/ui/AppModal.vue'
 import StatusBadge from '@/components/ui/StatusBadge.vue'
 import FinalizarLocacaoModal from '../components/FinalizarLocacaoModal.vue'
+import VistoriaModal from '@/modules/vistorias/components/VistoriaModal.vue'
 import { usePagination } from '@/composables/usePagination'
 import { formatDate } from '@/lib/date'
 import { locacaoService } from '../services/locacao.service'
 import { useLocacoesStore } from '@/stores/locacoes.store'
 import { useUiStore } from '@/stores/ui.store'
-import type { Locacao } from '../types/locacao.types'
-import type { LocacaoStatus } from '../types/locacao.types'
+import type { Locacao, LocacaoStatus } from '../types/locacao.types'
 
 const router = useRouter()
 const locacoesStore = useLocacoesStore()
@@ -24,6 +24,8 @@ const cancelModalOpen = ref(false)
 const locacaoToCancel = ref<Locacao | null>(null)
 const finalizarModalOpen = ref(false)
 const locacaoToFinalizar = ref<Locacao | null>(null)
+const vistoriaModalOpen = ref(false)
+const locacaoParaVistoria = ref<Locacao | null>(null)
 
 async function loadLocacoes(page = 1) {
   await locacoesStore.fetchLocacoes(page)
@@ -58,6 +60,20 @@ function openFinalizarModal(locacao: Locacao) {
 function closeFinalizarModal() {
   finalizarModalOpen.value = false
   locacaoToFinalizar.value = null
+}
+
+function openVistoriaModal(locacao: Locacao) {
+  locacaoParaVistoria.value = locacao
+  vistoriaModalOpen.value = true
+}
+
+function closeVistoriaModal() {
+  vistoriaModalOpen.value = false
+  locacaoParaVistoria.value = null
+}
+
+function onVistoriaCreated() {
+  closeVistoriaModal()
 }
 
 async function confirmDelete() {
@@ -116,6 +132,13 @@ function formatCurrency(valor: number) {
 
 function periodoLabel(locacao: Locacao) {
   return `${formatDate(locacao.data_inicio_periodo)} - ${formatDate(locacao.data_final_previsto_periodo)}`
+}
+
+function getStatusForBadge(status: string): LocacaoStatus {
+  if (['reservada', 'ativa', 'finalizada', 'cancelada'].includes(status)) {
+    return status as LocacaoStatus
+  }
+  return 'reservada'
 }
 
 onMounted(() => loadLocacoes(1))
@@ -192,10 +215,18 @@ onMounted(() => loadLocacoes(1))
                 {{ locacao.carro?.placa ?? '-' }}
               </td>
               <td class="whitespace-nowrap px-6 py-4 text-sm">
-                <StatusBadge
-                  :status="(locacao.status as LocacaoStatus)"
-                  :label="locacao.status_label"
-                />
+                <div class="flex flex-wrap items-center gap-1">
+                  <StatusBadge
+                    :status="getStatusForBadge(locacao.status)"
+                    :label="locacao.status_label"
+                  />
+                  <span
+                    v-if="locacao.atrasada"
+                    class="inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium bg-red-100 text-red-800"
+                  >
+                    Atrasada
+                  </span>
+                </div>
               </td>
               <td class="whitespace-nowrap px-6 py-4 text-sm text-surface-500">
                 {{ periodoLabel(locacao) }}
@@ -214,6 +245,14 @@ onMounted(() => loadLocacoes(1))
                     @click="handleIniciar(locacao)"
                   >
                     Iniciar
+                  </AppButton>
+                  <AppButton
+                    variant="ghost"
+                    size="sm"
+                    class="ml-2"
+                    @click="openVistoriaModal(locacao)"
+                  >
+                    Vistoria
                   </AppButton>
                   <AppButton
                     variant="ghost"
@@ -247,6 +286,14 @@ onMounted(() => loadLocacoes(1))
                     @click="openFinalizarModal(locacao)"
                   >
                     Finalizar
+                  </AppButton>
+                  <AppButton
+                    variant="ghost"
+                    size="sm"
+                    class="ml-2"
+                    @click="openVistoriaModal(locacao)"
+                  >
+                    Vistoria
                   </AppButton>
                   <AppButton
                     variant="danger"
@@ -327,6 +374,13 @@ onMounted(() => loadLocacoes(1))
       :locacao-id="locacaoToFinalizar?.id ?? 0"
       @close="closeFinalizarModal"
       @finalizada="onFinalizada"
+    />
+
+    <VistoriaModal
+      :visible="vistoriaModalOpen"
+      :locacao-id="locacaoParaVistoria?.id ?? 0"
+      @close="closeVistoriaModal"
+      @created="onVistoriaCreated"
     />
   </div>
 </template>

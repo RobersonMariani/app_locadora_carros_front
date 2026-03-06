@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router'
 import { CurrencyDollarIcon } from '@heroicons/vue/24/outline'
 import AppButton from '@/components/ui/AppButton.vue'
 import AppModal from '@/components/ui/AppModal.vue'
+import StatusBadge from '@/components/ui/StatusBadge.vue'
 import { usePagination } from '@/composables/usePagination'
 import { usePagamentosStore } from '@/stores/pagamentos.store'
 import { useUiStore } from '@/stores/ui.store'
@@ -128,6 +129,11 @@ onMounted(() => loadPagamentos(1))
               <th
                 class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-surface-500"
               >
+                Status
+              </th>
+              <th
+                class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-surface-500"
+              >
                 Data
               </th>
               <th
@@ -154,6 +160,14 @@ onMounted(() => loadPagamentos(1))
               </td>
               <td class="whitespace-nowrap px-6 py-4 text-sm text-surface-500">
                 {{ pagamento.metodo_pagamento_label }}
+              </td>
+              <td class="whitespace-nowrap px-6 py-4">
+                <StatusBadge
+                  v-if="pagamento.status"
+                  :status="pagamento.status as 'pendente' | 'pago' | 'cancelado'"
+                  :label="pagamento.status_label"
+                />
+                <span v-else class="text-surface-400">—</span>
               </td>
               <td class="whitespace-nowrap px-6 py-4 text-sm text-surface-500">
                 {{ formatDate(pagamento.data_pagamento) }}

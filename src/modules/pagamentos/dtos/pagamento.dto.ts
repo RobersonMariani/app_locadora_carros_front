@@ -5,6 +5,7 @@ export const createPagamentoSchema = z.object({
   valor: z.coerce.number().min(0.01, 'Valor deve ser maior que zero'),
   tipo: z.string().min(1, 'Tipo é obrigatório'),
   metodo_pagamento: z.string().min(1, 'Método de pagamento é obrigatório'),
+  status: z.string().optional(),
   data_pagamento: z.string().min(1, 'Data do pagamento é obrigatória'),
   observacoes: z.string().optional().or(z.literal('')),
 })
@@ -14,6 +15,7 @@ export const updatePagamentoSchema = z.object({
   valor: z.coerce.number().min(0.01).optional(),
   tipo: z.string().optional(),
   metodo_pagamento: z.string().optional(),
+  status: z.string().optional(),
   data_pagamento: z.string().optional(),
   observacoes: z.string().optional().or(z.literal('')),
 })

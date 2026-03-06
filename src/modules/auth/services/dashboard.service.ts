@@ -7,9 +7,18 @@ export interface DashboardResumo {
   total_clientes: number
   carros_disponiveis: number
   carros_locados: number
+  carros_em_manutencao: number
+  taxa_ocupacao: number
   locacoes_ativas: number
   locacoes_reservadas: number
+  locacoes_atrasadas: number
   faturamento_mes: number
+  total_multas_pendentes: number
+  valor_multas_pendentes: number
+  total_a_receber: number
+  total_recebido_mes: number
+  manutencoes_proximas: number
+  alertas_nao_lidos: number
 }
 
 export interface LocacaoPorStatus {
